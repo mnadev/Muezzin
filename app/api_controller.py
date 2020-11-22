@@ -22,6 +22,7 @@ def get_hijri_date(time=None):
 
   return hijri_date
 
+
 def get_gregorian_date():
   time = arrow.now()
 
@@ -31,3 +32,49 @@ def get_gregorian_date():
   gregorian_date['year'] = time.year
   gregorian_date['weekday'] = time.date().strftime("%A")
   return gregorian_date
+
+
+def get_location():
+  location_response = requests.get(constants.GEOLOCATION_URL)
+  if location_response.status_code != 200:
+    return None
+  return location_response.json()
+
+
+def _get_prayer_times(country, zipcode, latitude, longitude, time_zone, time=arrow.now()):
+  location = get_location()
+
+  if latitude is None or longitude is None:
+    latitude = location["latitude"]
+    longitude = location["longitude"]
+
+  if time_zone is None:
+    time_zone = location["time_zone"]
+
+  if zipcode is None:
+    zipcode = location["zip_code"]
+
+  if country is None:
+    country = location["country_code"]
+
+  params = {
+    "latitude": latitude,
+    "longitude": longitude,
+    "time_zone": time_zone,
+    "zipcode": zipcode,
+    "country": country
+  }
+
+  prayer_times_response = requests.get(constants.PRAYER_TIMES_URL, params=params)
+  if prayer_times_response.status_code != 200:
+    return None
+  return prayer_times_response.json()['results']
+
+
+def get_prayer_times_day(country=None, zipcode=None, latitude=None, longitude=None, time_zone=None):
+  return _get_prayer_times(country=country, zipcode=zipcode, latitude=latitude, longitude=longitude, )
+
+
+def get_prayer_times_tomorrow(country=None, zipcode=None, latitude=None, longitude=None, time_zone=None):
+  return _get_prayer_times(country=country, zipcode=zipcode, latitude=latitude, longitude=longitude,
+                           time_zone=time_zone, time=arrow.now().shift(days=1))

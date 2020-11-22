@@ -25,7 +25,9 @@ MAGHRIB_RULE_STRINGS = ["Angle", "Fixed Minutes"]
 
 ISHA_RULE_STRINGS = ["Angle", "Fixed Minutes"]
 
-PRAYER_TIMES_URL = "http://www.islamicfinder.us/index.php/api/"
+PRAYER_TIMES_URL = "http://www.islamicfinder.us/index.php/api/prayer_times"
+
+GEOLOCATION_URL = "https://freegeoip.app/json/"
 
 HIJRI_DATE_URL = "http://www.islamicfinder.us/index.php/api/calendar"
 
