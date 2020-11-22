@@ -27,4 +27,17 @@ ISHA_RULE_STRINGS = ["Angle", "Fixed Minutes"]
 
 PRAYER_TIMES_URL = "http://www.islamicfinder.us/index.php/api/"
 
-HIJRI_DATE_URL = "http://api.aladhan.com/v1/gToH"
+HIJRI_DATE_URL = "http://www.islamicfinder.us/index.php/api/calendar"
+
+HIJRI_MONTH_STRING = {1: "Muharram",
+                      2: "Safar",
+                      3: "Rabi' al-awwal",
+                      4: "Rabi' al-thani",
+                      5: "Jumada al-ula",
+                      6: "Jumada al-akhirah",
+                      7: "Rajab",
+                      8: "Sha'ban",
+                      9: "Ramadan",
+                      10: "Shawwal",
+                      11: "Dhu al-Qidah",
+                      12: "Dhu al-Hijjah"}
