@@ -21,3 +21,13 @@ def get_hijri_date(time=None):
   hijri_date['year'] = parsed_hijri_date.year
 
   return hijri_date
+
+def get_gregorian_date():
+  time = arrow.now()
+
+  gregorian_date = dict()
+  gregorian_date['month'] = time.date().strftime("%B")
+  gregorian_date['day'] = time.day
+  gregorian_date['year'] = time.year
+  gregorian_date['weekday'] = time.date().strftime("%A")
+  return gregorian_date
