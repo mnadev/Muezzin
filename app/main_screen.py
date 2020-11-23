@@ -27,11 +27,11 @@ class PrayerPane(GridLayout):
     super(PrayerPane, self).__init__(**kwargs)
     self.cols = 1
     self.rows = 6
-    self.add_widget(WrappedLabel(text="Fajr: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-Bold"))
-    self.add_widget(WrappedLabel(text="Duha: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-Bold"))
-    self.add_widget(WrappedLabel(text="Dhuhr: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-Bold"))
-    self.add_widget(WrappedLabel(text="Asr: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-Bold"))
-    self.add_widget(WrappedLabel(text="Maghrib: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-Bold"))
+    self.add_widget(WrappedLabel(text="Fajr: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-BoldItalic"))
+    self.add_widget(WrappedLabel(text="Duha: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-BoldItalic"))
+    self.add_widget(WrappedLabel(text="Dhuhr: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-BoldItalic"))
+    self.add_widget(WrappedLabel(text="Asr: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-BoldItalic"))
+    self.add_widget(WrappedLabel(text="Maghrib: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-BoldItalic"))
     self.add_widget(WrappedLabel(text="Isha: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-BoldItalic"))
 
 
