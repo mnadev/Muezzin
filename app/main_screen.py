@@ -9,7 +9,7 @@ class MainScreen(GridLayout):
     self.cols = 3
     self.add_widget(CalendarPane())
     self.add_widget(
-      Label(text=datetime.datetime.now().strftime("%I:%M %p"), color=[0, 0, 0, 1], font_name="RobotoMono-Regular"))
+      Label(text=datetime.datetime.now().strftime("%I:%M %p"), color=[1, 1, 1, 1], font_name="RobotoMono-Regular"))
     self.add_widget(PrayerPane())
 
 
