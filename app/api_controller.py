@@ -72,7 +72,8 @@ def _get_prayer_times(country, zipcode, latitude, longitude, time_zone, time=arr
 
 
 def get_prayer_times_day(country=None, zipcode=None, latitude=None, longitude=None, time_zone=None):
-  return _get_prayer_times(country=country, zipcode=zipcode, latitude=latitude, longitude=longitude, )
+  return _get_prayer_times(country=country, zipcode=zipcode, latitude=latitude, longitude=longitude,
+                           time_zone=time_zone)
 
 
 def get_prayer_times_tomorrow(country=None, zipcode=None, latitude=None, longitude=None, time_zone=None):
