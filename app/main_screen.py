@@ -1,3 +1,4 @@
+from kivy.clock import Clock
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 import datetime
@@ -7,11 +8,20 @@ class MainScreen(GridLayout):
   def __init__(self, **kwargs):
     super(MainScreen, self).__init__(**kwargs)
     self.cols = 3
+
+    self.time_widget = Label(text=datetime.datetime.now().strftime("%I:%M %p"), color=[1, 1, 1, 1],
+                             font_name="RobotoMono-Regular",
+                             size_hint=(0.4, 1), font_size="30sp")
+
     self.add_widget(CalendarPane(size_hint=(0.4, 1.0)))
-    self.add_widget(
-      Label(text=datetime.datetime.now().strftime("%I:%M %p"), color=[1, 1, 1, 1], font_name="RobotoMono-Regular",
-            size_hint=(0.4, 1), font_size="30sp"))
+    self.add_widget(self.time_widget)
     self.add_widget(PrayerPane(size_hint=(0.2, 1)))
+
+    Clock.schedule_once(self.update, datetime.datetime.now().second % 60)
+
+  def update(self, *args):
+    self.time_widget.text = datetime.datetime.now().strftime("%I:%M %p")
+    Clock.schedule_once(self.update, datetime.datetime.now().second % 60)
 
 
 class CalendarPane(GridLayout):
