@@ -7,10 +7,11 @@ class MainScreen(GridLayout):
   def __init__(self, **kwargs):
     super(MainScreen, self).__init__(**kwargs)
     self.cols = 3
-    self.add_widget(CalendarPane())
+    self.add_widget(CalendarPane(size_hint=(0.4, 1.0)))
     self.add_widget(
-      Label(text=datetime.datetime.now().strftime("%I:%M %p"), color=[1, 1, 1, 1], font_name="RobotoMono-Regular"))
-    self.add_widget(PrayerPane())
+      Label(text=datetime.datetime.now().strftime("%I:%M %p"), color=[1, 1, 1, 1], font_name="RobotoMono-Regular",
+            size_hint=(0.4, 1)))
+    self.add_widget(PrayerPane(size_hint=(0.2, 1)))
 
 
 class CalendarPane(GridLayout):
