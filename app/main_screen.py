@@ -10,7 +10,7 @@ class MainScreen(GridLayout):
     self.cols = 2
 
     self.add_widget(TimePane())
-    self.add_widget(PrayerPane(size_hint=(0.2, 1)))
+    self.add_widget(PrayerPane(size_hint=(0.3, 1)))
 
 
 class TimePane(GridLayout):
@@ -50,18 +50,27 @@ class PrayerPane(GridLayout):
     super(PrayerPane, self).__init__(**kwargs)
     self.cols = 1
     self.rows = 6
-    self.add_widget(
-      WrappedLabel(text="Fajr: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-BoldItalic", font_size="16sp"))
-    self.add_widget(
-      WrappedLabel(text="Duha: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-BoldItalic", font_size="16sp"))
-    self.add_widget(
-      WrappedLabel(text="Dhuhr: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-BoldItalic", font_size="16sp"))
-    self.add_widget(
-      WrappedLabel(text="Asr: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-BoldItalic", font_size="16sp"))
-    self.add_widget(
-      WrappedLabel(text="Maghrib: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-BoldItalic", font_size="16sp"))
-    self.add_widget(
-      WrappedLabel(text="Isha: 5:04 AM", color=[0, 0, 0, 1], font_name="Roboto-BoldItalic", font_size="16sp"))
+    self.add_widget(PrayerTimeLayout(prayer_time="Fajr"))
+    self.add_widget(PrayerTimeLayout(prayer_time="Duha"))
+    self.add_widget(PrayerTimeLayout(prayer_time="Dhuhr"))
+    self.add_widget(PrayerTimeLayout(prayer_time="Asr"))
+    self.add_widget(PrayerTimeLayout(prayer_time="Maghrib"))
+    self.add_widget(PrayerTimeLayout(prayer_time="Isha"))
+
+
+class PrayerTimeLayout(GridLayout):
+  def __init__(self, prayer_time, **kwargs):
+    super(PrayerTimeLayout, self).__init__(**kwargs)
+    self.cols = 1
+    self.rows = 2
+
+    self.prayer_time = prayer_time
+    self.todays_time = WrappedLabel(text=self.prayer_time + ": 5:04 AM", color=[0, 0, 0, 1],
+                                    font_name="Roboto-BoldItalic", font_size="15sp")
+    self.tomorrows_time = WrappedLabel(text="Tomorrow: 5:04 AM", color=[0, 0, 0, 0.9],
+                                       font_name="Roboto-BoldItalic", font_size="8sp")
+    self.add_widget(self.todays_time)
+    self.add_widget(self.tomorrows_time)
 
 
 class WrappedLabel(Label):
