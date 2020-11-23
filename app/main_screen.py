@@ -5,11 +5,18 @@ import datetime
 class MainScreen(GridLayout):
   def __init__(self, **kwargs):
     super(MainScreen, self).__init__(**kwargs)
-    self.cols = 5
+    self.cols = 3
+    self.add_widget(CalendarPane())
     self.add_widget(Label(text=datetime.datetime.now().strftime("%I:%M") , color=[0, 0, 0, 1]))
+    self.add_widget(PrayerPane())
+
+class CalendarPane(GridLayout):
+  def __init__(self, **kwargs):
+    super(CalendarPane, self).__init__(**kwargs)
+    self.cols = 1
+    self.rows = 2
     self.add_widget(Label(text="Saturday, October 20, 2020", color=[0, 0, 0, 1]))
     self.add_widget(Label(text="14 Ramadan 1440 AH", color=[0, 0, 0, 1]))
-    self.add_widget(PrayerPane())
 
 class PrayerPane(GridLayout):
   def __init__(self, **kwargs):
