@@ -9,7 +9,7 @@ from kivy.app import App
 from kivy.core.window import Window
 from main_screen import MainScreen
 
-Window.clearcolor = (1, 1, 1, 1)
+Window.clearcolor = (0.1, 0.61, 0.2, 0.91)
 
 class MuezzinApp(App):
   def build(self):
