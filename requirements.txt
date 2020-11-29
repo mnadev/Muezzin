@@ -4,7 +4,7 @@ chardet==3.0.4
 docutils==0.16
 ffpyplayer==4.3.2
 idna==2.10
-Kivy==2.0.0rc1
+Kivy==2.0.0rc2
 Kivy-Garden==0.1.4
 Pygments==2.7.2
 python-dateutil==2.8.1

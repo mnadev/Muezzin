@@ -1,8 +1,8 @@
 from kivy.clock import Clock
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.image import Image
 from kivy.uix.label import Label
 import datetime
-
 
 class MainScreen(GridLayout):
   def __init__(self, **kwargs):
@@ -35,8 +35,11 @@ class TimePane(GridLayout):
 class CalendarBox(GridLayout):
   def __init__(self, **kwargs):
     super(CalendarBox, self).__init__(**kwargs)
-    self.cols = 2
+    self.cols = 3
     self.rows = 1
+
+    # Logo courtesy of flaticon
+    self.add_widget(Image(source="res/mosque.png", keep_ratio=True, size_hint_x=0.1, pos=(0,0)))
     self.add_widget(
       WrappedLabel(text="Saturday, October 20, 2020", color=[0, 0, 0, 1], font_name="Roboto-Bold", font_size="16sp",
                    size_hint=(0.5, 1), padding=("10sp", "0sp")))
