@@ -25,11 +25,11 @@ class TimePane(GridLayout):
     self.add_widget(CalendarBox(size_hint=(1, 0.5)))
     self.add_widget(self.time_widget)
 
-    Clock.schedule_once(self.update, datetime.datetime.now().second % 60)
+    Clock.schedule_once(self.update, 60 - datetime.datetime.now().second % 60)
 
   def update(self, *args):
     self.time_widget.text = datetime.datetime.now().strftime("%I:%M %p")
-    Clock.schedule_once(self.update, datetime.datetime.now().second % 60)
+    Clock.schedule_once(self.update, 60 - datetime.datetime.now().second % 60)
 
 
 class CalendarBox(GridLayout):
