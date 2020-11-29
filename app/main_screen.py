@@ -20,7 +20,7 @@ class TimePane(GridLayout):
     self.rows = 2
     self.time_widget = Label(text=datetime.datetime.now().strftime("%I:%M %p"), color=[1, 1, 1, 1],
                              font_name="RobotoMono-Regular",
-                             size_hint=(1, 0.5), font_size="30sp")
+                             size_hint=(1, 0.5), font_size="50sp")
 
     self.add_widget(CalendarBox(size_hint=(1, 0.5)))
     self.add_widget(self.time_widget)
