@@ -1,8 +1,12 @@
+from kivy.core.audio import SoundLoader
 from kivy.clock import Clock
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 import datetime
+
+sound = SoundLoader.load('res/adhan.mp3')
+sound.seek(0)
 
 class MainScreen(GridLayout):
   def __init__(self, **kwargs):
@@ -75,6 +79,17 @@ class PrayerTimeLayout(GridLayout):
     self.add_widget(self.todays_time)
     self.add_widget(self.tomorrows_time)
 
+
+    Clock.schedule_once(self.play_adhan, (self.get_time_of_prayer("6:26 PM") - datetime.datetime.now()).total_seconds())
+
+  def play_adhan(self, *args):
+    sound.play()
+
+  def get_time_of_prayer(self, time_string):
+    adhan_time = datetime.datetime.strptime(time_string, "%I:%M %p")
+    today = datetime.datetime.today()
+    today = today.replace(hour=adhan_time.hour, minute=adhan_time.minute, second=0, microsecond=0)
+    return today
 
 class WrappedLabel(Label):
   # Courtesy of https://stackoverflow.com/questions/43666381/wrapping-the-text-of-a-kivy-label
