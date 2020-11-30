@@ -45,7 +45,6 @@ class TimePane(GridLayout):
     self.time_widget.text = datetime.datetime.now().strftime("%I:%M %p")
     Clock.schedule_once(self.update, 60 - datetime.datetime.now().second % 60)
 
-
 class CalendarBox(GridLayout):
   def __init__(self, **kwargs):
     super(CalendarBox, self).__init__(**kwargs)
@@ -84,11 +83,11 @@ class PrayerPane(GridLayout):
     super(PrayerPane, self).__init__(**kwargs)
     self.cols = 1
     self.rows = 6
-    self.todays_times = {'Fajr': '12:00 %am%', 'Duha': '12:00 %am%', 'Dhuhr': '12:00 %am%', 'Asr': '12:00 %am%',
-                         'Maghrib': '12:00 %am%', 'Isha': '12:00 %am%'}
+    self.todays_times = {'Fajr': '12:00 am', 'Duha': '12:00 am', 'Dhuhr': '12:00 am', 'Asr': '12:00 am',
+                         'Maghrib': '12:00 am', 'Isha': '12:00 am'}
 
-    self.tomorrow_times = {'Fajr': '12:00 %am%', 'Duha': '12:00 %am%', 'Dhuhr': '12:00 %am%', 'Asr': '12:00 %am%',
-                           'Maghrib': '12:00 %am%', 'Isha': '12:00 %am%'}
+    self.tomorrow_times = {'Fajr': '12:00 am', 'Duha': '12:00 am', 'Dhuhr': '12:00 am', 'Asr': '12:00 am',
+                           'Maghrib': '12:00 am', 'Isha': '12:00 am'}
 
     self.prayer_time_widgets = dict()
     for prayer_time in ["Fajr", "Duha", "Dhuhr", "Asr", "Maghrib", "Isha"]:
@@ -118,19 +117,24 @@ class PrayerTimeLayout(GridLayout):
     self.rows = 2
 
     self.prayer_time = prayer_time
-    self.todays_time_widget = WrappedLabel(text=self.prayer_time + ": " + todays_times[self.prayer_time],
+    self.todays_times = todays_times
+    self.tomorrow_times = tomorrow_times
+
+    self.todays_time_widget = WrappedLabel(text=self.prayer_time + ": " + self.todays_times[self.prayer_time],
                                            color=[0, 0, 0, 1], font_name="Roboto-BoldItalic", font_size="15sp")
-    self.tomorrows_time_widget = WrappedLabel(text="Tomorrow: " + tomorrow_times[self.prayer_time],
+    self.tomorrows_time_widget = WrappedLabel(text="Tomorrow: " + self.tomorrow_times[self.prayer_time],
                                               color=[0, 0, 0, 0.9], font_name="Roboto-BoldItalic", font_size="8sp")
     self.add_widget(self.todays_time_widget)
     self.add_widget(self.tomorrows_time_widget)
 
-    Clock.schedule_once(self.play_adhan, (
-            self.get_time_of_prayer("6:09 am") - datetime.datetime.now()).total_seconds())
+  def schedule_adhan(self):
+    time_of_prayer = self.get_time_of_prayer(self.todays_times[self.prayer_time])
+    if time_of_prayer < datetime.datetime.now():
+      time_of_prayer = self.get_time_of_prayer(self.tomorrow_times[self.prayer_time]) + datetime.timedelta(days=1)
+    Clock.schedule_once(self.play_adhan, (time_of_prayer - datetime.datetime.now()).total_seconds())
 
   def play_adhan(self, *args):
-    # sound.play()
-    print()
+    sound.play()
 
   def get_time_of_prayer(self, time_string):
     adhan_time = datetime.datetime.strptime(time_string, "%I:%M %p")
@@ -139,8 +143,11 @@ class PrayerTimeLayout(GridLayout):
     return today
 
   def update(self, todays_times, tomorrow_times):
+    self.todays_times = todays_times
+    self.tomorrow_times = tomorrow_times
     self.todays_time_widget.text = self.prayer_time + ": " + todays_times[self.prayer_time]
     self.tomorrows_time_widget.text = "Tomorrow: " + tomorrow_times[self.prayer_time]
+    self.schedule_adhan()
 
 
 class WrappedLabel(Label):
