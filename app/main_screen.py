@@ -3,7 +3,9 @@ from kivy.clock import Clock
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
+
 import api_controller as getter
+import concurrent.futures
 import datetime
 
 sound = SoundLoader.load('res/adhan.mp3')
@@ -49,24 +51,31 @@ class CalendarBox(GridLayout):
                                          font_name="Roboto-Bold", font_size="16sp", size_hint=(0.5, 1),
                                          padding=("10sp", "0sp"))
 
+    self.hijri_widget = WrappedLabel(text="14 Ramadan 1440 AH", color=[0, 0, 0, 1], font_name="Roboto-Bold",
+                                     font_size="16sp", size_hint=(0.5, 1), padding=("10sp", "0sp"))
+    self.update_hijri_date()
     # Logo courtesy of flaticon
     self.add_widget(Image(source="res/mosque.png", keep_ratio=True, size_hint_x=0.1, pos=(0, 0)))
     self.add_widget(self.gregorian_widget)
-    self.add_widget(
-      WrappedLabel(text="14 Ramadan 1440 AH", color=[0, 0, 0, 1], font_name="Roboto-Bold", font_size="16sp",
-                   size_hint=(0.5, 1), padding=("10sp", "0sp")))
+    self.add_widget(self.hijri_widget)
 
     Clock.schedule_once(self.update, (self.get_tomorrow_date() - datetime.datetime.now()).seconds)
 
   def update(self, *args):
     gregorian_date = getter.get_gregorian_date()
     self.gregorian_widget.text = gregorian_date["formatted_string"]
+    self.update_hijri_date()
     Clock.schedule_once(self.update, (self.get_tomorrow_date() - datetime.datetime.now()).seconds)
 
   def get_tomorrow_date(self):
     today = datetime.datetime.today()
     today = today.replace(hour=0, minute=0, second=0, microsecond=0)
     return today + datetime.timedelta(days=1)
+
+  def update_hijri_date(self):
+    future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_hijri_date)
+    hijri_date = future.result()
+    self.hijri_widget.text = str(hijri_date['day']) + " " + hijri_date['month'] + " " + str(hijri_date['year']) + " AH"
 
 
 class PrayerPane(GridLayout):
