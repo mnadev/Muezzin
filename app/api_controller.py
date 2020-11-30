@@ -1,5 +1,6 @@
 import arrow
 import constants
+import re
 import requests
 
 
@@ -70,10 +71,14 @@ def _get_prayer_times(country, zipcode, latitude, longitude, time_zone, time=arr
   prayer_times_response = requests.get(constants.PRAYER_TIMES_URL, params=params)
   if prayer_times_response.status_code != 200:
     return None
-  return prayer_times_response.json()['results']
+  results = prayer_times_response.json()['results']
+  for prayer_time in results:
+    results[prayer_time] = re.sub('%', '', results[prayer_time])
+
+  return results
 
 
-def get_prayer_times_day(country=None, zipcode=None, latitude=None, longitude=None, time_zone=None):
+def get_prayer_times_today(country=None, zipcode=None, latitude=None, longitude=None, time_zone=None):
   return _get_prayer_times(country=country, zipcode=zipcode, latitude=latitude, longitude=longitude,
                            time_zone=time_zone)
 
