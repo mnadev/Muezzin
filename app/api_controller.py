@@ -1,5 +1,5 @@
-import constants
 import arrow
+import constants
 import requests
 
 
@@ -31,6 +31,8 @@ def get_gregorian_date():
   gregorian_date['day'] = time.day
   gregorian_date['year'] = time.year
   gregorian_date['weekday'] = time.date().strftime("%A")
+  gregorian_date["formatted_string"] = gregorian_date['weekday'] + ", " + gregorian_date['month'] + " " + \
+                                       str(gregorian_date['day']) + ", " + str(gregorian_date['year'])
   return gregorian_date
 
 
