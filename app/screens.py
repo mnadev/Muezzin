@@ -1,4 +1,6 @@
 from kivy.core.audio import SoundLoader
+from kivy.uix.carousel import Carousel
+from kivy.uix.checkbox import CheckBox
 from kivy.clock import Clock
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
@@ -8,8 +10,19 @@ import api_controller as getter
 import concurrent.futures
 import datetime
 
-sound = SoundLoader.load('res/adhan.mp3')
-sound.seek(0)
+fajr_alarm = False
+
+
+def update_fajr_alarm(checkbox, value):
+  global fajr_alarm
+  fajr_alarm = value
+
+
+adhan = SoundLoader.load('res/adhan.mp3')
+adhan.seek(0)
+
+alarm = SoundLoader.load('res/alarm/alarm.mp3')
+alarm.seek(0)
 
 
 def get_tomorrow_date():
@@ -18,13 +31,30 @@ def get_tomorrow_date():
   return today + datetime.timedelta(days=1)
 
 
+class MuezzinCarousel(Carousel):
+  def __init__(self, **kwargs):
+    super(MuezzinCarousel, self).__init__(**kwargs)
+    self.main_screen = MainScreen()
+    self.settings_screen = SettingsScreen()
+    self.add_widget(self.main_screen)
+    self.add_widget(self.settings_screen)
+
+  def on_index(self, *args):
+    if self.index == 0:
+      self.main_screen.prayer_pane.update()
+
+    Carousel.on_index(self, *args)
+
+
 class MainScreen(GridLayout):
   def __init__(self, **kwargs):
     super(MainScreen, self).__init__(**kwargs)
     self.cols = 2
 
     self.add_widget(TimePane())
-    self.add_widget(PrayerPane(size_hint=(0.3, 1)))
+
+    self.prayer_pane = PrayerPane(size_hint=(0.3, 1))
+    self.add_widget(self.prayer_pane)
 
 
 class TimePane(GridLayout):
@@ -44,6 +74,7 @@ class TimePane(GridLayout):
   def update(self, *args):
     self.time_widget.text = datetime.datetime.now().strftime("%I:%M %p")
     Clock.schedule_once(self.update, 60 - datetime.datetime.now().second % 60)
+
 
 class CalendarBox(GridLayout):
   def __init__(self, **kwargs):
@@ -132,9 +163,29 @@ class PrayerTimeLayout(GridLayout):
     if time_of_prayer < datetime.datetime.now():
       time_of_prayer = self.get_time_of_prayer(self.tomorrow_times[self.prayer_time]) + datetime.timedelta(days=1)
     Clock.schedule_once(self.play_adhan, (time_of_prayer - datetime.datetime.now()).total_seconds())
+    Clock.schedule_once(self.reset_adhan, (time_of_prayer - datetime.datetime.now()).total_seconds() + 120)
+
+    if fajr_alarm and self.prayer_time == 'Fajr':
+      self.schedule_alarm_before_prayer()
+
+  def schedule_alarm_before_prayer(self):
+    time_of_prayer = self.get_time_of_prayer(self.todays_times[self.prayer_time])
+    if time_of_prayer < datetime.datetime.now():
+      time_of_prayer = self.get_time_of_prayer(self.tomorrow_times[self.prayer_time]) + datetime.timedelta(days=1)
+    Clock.schedule_once(self.play_alarm, (time_of_prayer - datetime.datetime.now()).total_seconds() - 600)
+    Clock.schedule_once(self.reset_alarm, (time_of_prayer - datetime.datetime.now()).total_seconds() - 600 + 17)
+
+  def play_alarm(self, *args):
+    alarm.play()
 
   def play_adhan(self, *args):
-    sound.play()
+    adhan.play()
+
+  def reset_alarm(self, *args):
+    alarm.seek(0)
+
+  def reset_adhan(self, *args):
+    adhan.seek(0)
 
   def get_time_of_prayer(self, time_string):
     adhan_time = datetime.datetime.strptime(time_string, "%I:%M %p")
@@ -158,3 +209,28 @@ class WrappedLabel(Label):
       width=lambda *x:
       self.setter('text_size')(self, (self.width, None)),
       texture_size=lambda *x: self.setter('height')(self, self.texture_size[1]))
+
+
+class SettingsScreen(GridLayout):
+  def __init__(self, **kwargs):
+    super(SettingsScreen, self).__init__(**kwargs)
+    self.cols = 1
+    self.rows = 2
+
+    self.add_widget(Label(text="Settings", color=[1, 1, 1, 1],
+                          font_name="RobotoMono-Regular",
+                          size_hint=(1, 0.5), font_size="30sp"))
+    self.add_widget(AlarmSetting())
+
+
+class AlarmSetting(GridLayout):
+  def __init__(self, **kwargs):
+    super(AlarmSetting, self).__init__(**kwargs)
+    self.cols = 2
+    self.rows = 1
+    self.add_widget(Label(text="Set alarm for 10 minutes before Fajr", color=[1, 1, 1, 1],
+                          font_name="RobotoMono-Regular",
+                          size_hint=(1, 0.5), font_size="10sp"))
+    self.alarm_checkbox = CheckBox(active=fajr_alarm)
+    self.alarm_checkbox.bind(active=update_fajr_alarm)
+    self.add_widget(self.alarm_checkbox)
