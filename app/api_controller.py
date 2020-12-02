@@ -65,7 +65,8 @@ def _get_prayer_times(country, zipcode, latitude, longitude, time_zone, time=arr
     "longitude": longitude,
     "time_zone": time_zone,
     "zipcode": zipcode,
-    "country": country
+    "country": country,
+    "date": time.strftime("%Y-%m-%d")
   }
 
   prayer_times_response = requests.get(constants.PRAYER_TIMES_URL, params=params)
