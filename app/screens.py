@@ -40,6 +40,7 @@ def update_keep_playing_alarm(value):
   keep_playing_alarm = value
   if not value:
     alarm.stop()
+    alarm.seek(0)
     keep_playing_alarm = True
 
 
