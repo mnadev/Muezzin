@@ -13,11 +13,21 @@ import datetime
 import re
 
 fajr_alarm = False
+is_fahrenheit = False
 
 
 def update_fajr_alarm(checkbox, value):
   global fajr_alarm
   fajr_alarm = value
+
+
+def update_fahrenheit_boolean(checkbox, value):
+  global is_fahrenheit
+  is_fahrenheit = value
+
+
+def celcius_to_fahrenheit(celsius):
+  return round((celsius * 9 / 5) + 32, 2)
 
 
 adhan = SoundLoader.load('res/adhan.mp3')
@@ -67,6 +77,7 @@ class InformationScreen(GridLayout):
     self.moon_widget.update()
     self.weather_widget.update()
 
+
 class WeatherWidget(GridLayout):
   def __init__(self, **kwargs):
     super(WeatherWidget, self).__init__(**kwargs)
@@ -74,14 +85,20 @@ class WeatherWidget(GridLayout):
     self.rows = 2
     self.woeid = None
     self.update_weather_location_woeid()
-    weather = self.update_weather()
+    self.weather = self.update_weather()
 
-    self.weather_text = Label(text=weather["weather_state_name"])
-    self.low_text = Label(text="High: " + str(weather["max_temp"]) + " °C")
-    self.high_text = Label(text="Low: " + str(weather["min_temp"]) + " °C")
+    self.weather_text = Label(text=self.weather["weather_state_name"])
+    self.low_text = Label()
+    self.high_text = Label()
+    if is_fahrenheit:
+      self.low_text.text = "High: " + str(celcius_to_fahrenheit(self.weather["max_temp"])) + " °F"
+      self.high_text.text = "Low: " + str(celcius_to_fahrenheit(self.weather["min_temp"])) + " °F"
+    else:
+      self.low_text.text = "High: " + str(self.weather["max_temp"]) + " °C"
+      self.high_text.text = "Low: " + str(self.weather["min_temp"]) + " °C"
 
     self.image = Image()
-    self.image.texture = CoreImage(self.update_weather_image(weather["weather_state_abbr"]), ext='png').texture
+    self.image.texture = CoreImage(self.update_weather_image(self.weather["weather_state_abbr"]), ext='png').texture
 
     self.add_widget(self.image)
     self.add_widget(self.weather_text)
@@ -106,14 +123,19 @@ class WeatherWidget(GridLayout):
   def update(self, *args):
     if (datetime.datetime.now() - self.last_update_time).total_seconds() >= 1800:
       self.update_weather_location_woeid()
-      weather = self.update_weather()
+      self.weather = self.update_weather()
 
-      self.weather_text.text = weather["weather_state_name"]
-      self.low_text.text = str(weather["max_temp"])
-      self.high_text.text = str(weather["min_temp"])
+      self.weather_text.text = self.weather["weather_state_name"]
 
-      self.image.texture = CoreImage(self.update_weather_image(weather["weather_state_abbr"]), ext='png').texture
+      self.image.texture = CoreImage(self.update_weather_image(self.weather["weather_state_abbr"]), ext='png').texture
       self.last_update_time = datetime.datetime.now()
+
+    if is_fahrenheit:
+      self.low_text.text = "High: " + str(celcius_to_fahrenheit(self.weather["max_temp"])) + " °F"
+      self.high_text.text = "Low: " + str(celcius_to_fahrenheit(self.weather["min_temp"])) + " °F"
+    else:
+      self.low_text.text = "High: " + str(self.weather["max_temp"]) + " °C"
+      self.high_text.text = "Low: " + str(self.weather["min_temp"]) + " °C"
 
 
 class MoonWidget(GridLayout):
@@ -336,12 +358,13 @@ class SettingsScreen(GridLayout):
   def __init__(self, **kwargs):
     super(SettingsScreen, self).__init__(**kwargs)
     self.cols = 1
-    self.rows = 2
+    self.rows = 3
 
     self.add_widget(Label(text="Settings", color=[1, 1, 1, 1],
                           font_name="RobotoMono-Regular",
                           size_hint=(1, 0.5), font_size="30sp"))
     self.add_widget(AlarmSetting())
+    self.add_widget(TemperatureUnitSetting())
 
 
 class AlarmSetting(GridLayout):
@@ -355,3 +378,16 @@ class AlarmSetting(GridLayout):
     self.alarm_checkbox = CheckBox(active=fajr_alarm)
     self.alarm_checkbox.bind(active=update_fajr_alarm)
     self.add_widget(self.alarm_checkbox)
+
+
+class TemperatureUnitSetting(GridLayout):
+  def __init__(self, **kwargs):
+    super(TemperatureUnitSetting, self).__init__(**kwargs)
+    self.cols = 2
+    self.rows = 1
+    self.add_widget(Label(text="Check for Fahrenheit (default: Celcius)", color=[1, 1, 1, 1],
+                          font_name="RobotoMono-Regular",
+                          size_hint=(1, 0.5), font_size="10sp"))
+    self.temp_checkbox = CheckBox(active=is_fahrenheit)
+    self.temp_checkbox.bind(active=update_fahrenheit_boolean)
+    self.add_widget(self.temp_checkbox)
