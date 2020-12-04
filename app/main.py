@@ -16,7 +16,6 @@ Window.clearcolor = (0.1, 0.61, 0.2, 0.91)
 
 class MuezzinApp(App):
   def build(self):
-    carousel = MuezzinCarousel(direction='right')
     return MuezzinCarousel(direction='right')
 
 

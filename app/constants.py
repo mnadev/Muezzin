@@ -43,3 +43,12 @@ HIJRI_MONTH_STRING = {1: "Muharram",
                       10: "Shawwal",
                       11: "Dhu al-Qidah",
                       12: "Dhu al-Hijjah"}
+
+
+WEATHER_API_LOCATION_SEARCH_URL = "https://www.metaweather.com/api/location/search/"
+
+WEATHER_API_URL = "https://www.metaweather.com/api/location/"
+
+WEATHER_API_ICONS_BASE_URL = "https://www.metaweather.com/static/img/weather/png/64/"
+
+MOON_API_URL = "https://www.icalendar37.net/lunar/api/"

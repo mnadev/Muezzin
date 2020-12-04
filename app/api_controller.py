@@ -1,7 +1,9 @@
 import arrow
 import constants
+from io import BytesIO
 import re
 import requests
+import time
 
 
 def get_hijri_date(time=None):
@@ -87,3 +89,37 @@ def get_prayer_times_today(country=None, zipcode=None, latitude=None, longitude=
 def get_prayer_times_tomorrow(country=None, zipcode=None, latitude=None, longitude=None, time_zone=None):
   return _get_prayer_times(country=country, zipcode=zipcode, latitude=latitude, longitude=longitude,
                            time_zone=time_zone, time=arrow.now().shift(days=1))
+
+
+def get_weather_image(weather_abbrv):
+  image_request = requests.get(constants.WEATHER_API_ICONS_BASE_URL + weather_abbrv + ".png")
+  return BytesIO(image_request.content)
+
+
+def get_weather_location_woeid():
+  location = get_location()
+  latitude = location["latitude"]
+  longitude = location["longitude"]
+  params = {"lattlong": str(latitude) + "," + str(longitude)}
+  location_request = requests.get(constants.WEATHER_API_LOCATION_SEARCH_URL, params=params)
+  return location_request.json()[0]['woeid']
+
+
+def get_weather(woeid):
+  weather_request = requests.get(constants.WEATHER_API_URL + str(woeid))
+  return weather_request.json()["consolidated_weather"][4]
+
+
+def get_moon_phase():
+  time = arrow.now()
+  params = {
+    "lang": "en",
+    "month": time.strftime("%m"),
+    "year": time.strftime("%Y"),
+    "size": 100,
+    "lightColor": "rgb(245, 245, 245)",
+    "shadeColor": "rgb(17, 17, 17)",
+    "LDZ": time.time()
+  }
+  moon_phase_request = requests.get(constants.MOON_API_URL, params=params)
+  return moon_phase_request.json()

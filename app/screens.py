@@ -3,12 +3,14 @@ from kivy.uix.carousel import Carousel
 from kivy.uix.checkbox import CheckBox
 from kivy.clock import Clock
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.image import Image
+from kivy.uix.image import CoreImage, Image
 from kivy.uix.label import Label
 
 import api_controller as getter
+import arrow
 import concurrent.futures
 import datetime
+import re
 
 fajr_alarm = False
 
@@ -34,16 +36,135 @@ def get_tomorrow_date():
 class MuezzinCarousel(Carousel):
   def __init__(self, **kwargs):
     super(MuezzinCarousel, self).__init__(**kwargs)
+    self.information_screen = InformationScreen()
     self.main_screen = MainScreen()
     self.settings_screen = SettingsScreen()
+
+    self.add_widget(self.information_screen)
     self.add_widget(self.main_screen)
     self.add_widget(self.settings_screen)
+    self.index = 1
 
   def on_index(self, *args):
-    if self.index == 0:
+    if self.index == 1:
       self.main_screen.prayer_pane.update()
-
+    if self.index == 0:
+      self.information_screen.update()
     Carousel.on_index(self, *args)
+
+
+class InformationScreen(GridLayout):
+  def __init__(self, **kwargs):
+    super(InformationScreen, self).__init__(**kwargs)
+    self.cols = 2
+    self.rows = 1
+    self.moon_widget = MoonWidget()
+    self.weather_widget = WeatherWidget()
+    self.add_widget(self.moon_widget)
+    self.add_widget(self.weather_widget)
+
+  def update(self):
+    self.moon_widget.update()
+    self.weather_widget.update()
+
+class WeatherWidget(GridLayout):
+  def __init__(self, **kwargs):
+    super(WeatherWidget, self).__init__(**kwargs)
+    self.cols = 2
+    self.rows = 2
+    self.woeid = None
+    self.update_weather_location_woeid()
+    weather = self.update_weather()
+
+    self.weather_text = Label(text=weather["weather_state_name"])
+    self.low_text = Label(text="High: " + str(weather["max_temp"]) + " °C")
+    self.high_text = Label(text="Low: " + str(weather["min_temp"]) + " °C")
+
+    self.image = Image()
+    self.image.texture = CoreImage(self.update_weather_image(weather["weather_state_abbr"]), ext='png').texture
+
+    self.add_widget(self.image)
+    self.add_widget(self.weather_text)
+    self.add_widget(self.high_text)
+    self.add_widget(self.low_text)
+    self.last_update_time = datetime.datetime.now()
+
+  def update_weather_image(self, weather_state_abbr):
+    future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_weather_image, weather_state_abbr)
+    image = future.result()
+    return image
+
+  def update_weather_location_woeid(self):
+    future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_weather_location_woeid)
+    self.woeid = future.result()
+
+  def update_weather(self):
+    future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_weather, self.woeid)
+    weather = future.result()
+    return weather
+
+  def update(self, *args):
+    if (datetime.datetime.now() - self.last_update_time).total_seconds() >= 1800:
+      self.update_weather_location_woeid()
+      weather = self.update_weather()
+
+      self.weather_text.text = weather["weather_state_name"]
+      self.low_text.text = str(weather["max_temp"])
+      self.high_text.text = str(weather["min_temp"])
+
+      self.image.texture = CoreImage(self.update_weather_image(weather["weather_state_abbr"]), ext='png').texture
+      self.last_update_time = datetime.datetime.now()
+
+
+class MoonWidget(GridLayout):
+  def __init__(self, **kwargs):
+    super(MoonWidget, self).__init__(**kwargs)
+    self.cols = 1
+    self.rows = 2
+    moon_phase = self.update_moon_phase()
+
+    self.moon_text = Label(text=moon_phase["phase"][arrow.now().strftime("%-d")]["npWidget"])
+    self.image = Image(source=self.get_moon_pic(moon_phase["phase"][arrow.now().strftime("%-d")]["npWidget"]))
+
+    self.add_widget(self.moon_text)
+    self.add_widget(self.image)
+    Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60)
+
+  def update_moon_phase(self):
+    future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_moon_phase)
+    moon_phase = future.result()
+    return moon_phase
+
+  def update(self, *args):
+    moon_phase = self.update_moon_phase()
+    self.moon_text.text = moon_phase["phase"][moon_phase["firstDayMonth"]]["npWidget"]
+    self.image.source = self.get_moon_pic(moon_phase["phase"][arrow.now().strftime("%-d")]["npWidget"])
+
+    Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60)
+
+  def get_moon_pic(self, moon_phase_text):
+    # Images courtesy of freepik/flaticon
+    if moon_phase_text.lower() == "full moon":
+      return "res/full_moon.png"
+    elif moon_phase_text.lower() == "new moon":
+      return "res/new_moon.png"
+    elif moon_phase_text.lower() == "first quarter":
+      return "res/full_moon.png"
+    elif moon_phase_text.lower() == "last quarter":
+      return "res/full_moon.png"
+    else:
+      split_moon_phase = re.compile("\((.*)\)").split(moon_phase_text)
+      percentage = split_moon_phase[1][:-1]
+      if "Waning" in moon_phase_text:
+        if int(percentage) < 50:
+          return "res/waning_crescent.png"
+        else:
+          return "res/waning_gibbous.png"
+      else:
+        if int(percentage) < 50:
+          return "res/waxing_crescent.png"
+        else:
+          return "res/waxing_gibbous.png"
 
 
 class MainScreen(GridLayout):
