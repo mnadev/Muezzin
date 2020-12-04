@@ -14,11 +14,17 @@ import re
 
 fajr_alarm = False
 is_fahrenheit = False
+tahajjud_alarm = False
 
 
 def update_fajr_alarm(checkbox, value):
   global fajr_alarm
   fajr_alarm = value
+
+
+def update_tahajjud_alarm(checkbox, value):
+  global tahajjud_alarm
+  tahajjud_alarm = value
 
 
 def update_fahrenheit_boolean(checkbox, value):
@@ -276,12 +282,36 @@ class PrayerPane(GridLayout):
     self.todays_times = todays_times_future.result()
     tomorrow_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_tomorrow)
     self.tomorrow_times = tomorrow_times_future.result()
-    Clock.schedule_once(self.update, 0)
 
   def update(self, *args):
     for prayer_time in ["Fajr", "Duha", "Dhuhr", "Asr", "Maghrib", "Isha"]:
       self.prayer_time_widgets[prayer_time].update(self.todays_times, self.tomorrow_times)
     Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds)
+    if tahajjud_alarm:
+      self.schedule_alarm_tahajjud()
+
+  def schedule_alarm_tahajjud(self):
+    tomorrows_fajr = self.get_time_of_prayer(self.tomorrow_times["Fajr"]) + datetime.timedelta(days=1)
+    todays_isha = self.get_time_of_prayer(self.todays_times["Isha"])
+
+    time_between_fajr_isha = (tomorrows_fajr - todays_isha).total_seconds()
+    third_of_night = 2 / 3 * time_between_fajr_isha
+    time_of_alarm = todays_isha + datetime.timedelta(seconds=third_of_night)
+
+    Clock.schedule_once(self.play_alarm, (time_of_alarm - datetime.datetime.now()).total_seconds())
+    Clock.schedule_once(self.reset_alarm, (time_of_alarm - datetime.datetime.now()).total_seconds() + 17)
+
+  def get_time_of_prayer(self, time_string):
+    adhan_time = datetime.datetime.strptime(time_string, "%I:%M %p")
+    today = datetime.datetime.today()
+    today = today.replace(hour=adhan_time.hour, minute=adhan_time.minute, second=0, microsecond=0)
+    return today
+
+  def play_alarm(self, *args):
+    alarm.play()
+
+  def reset_alarm(self, *args):
+    alarm.seek(0)
 
 
 class PrayerTimeLayout(GridLayout):
@@ -358,18 +388,19 @@ class SettingsScreen(GridLayout):
   def __init__(self, **kwargs):
     super(SettingsScreen, self).__init__(**kwargs)
     self.cols = 1
-    self.rows = 3
+    self.rows = 4
 
     self.add_widget(Label(text="Settings", color=[1, 1, 1, 1],
                           font_name="RobotoMono-Regular",
                           size_hint=(1, 0.5), font_size="30sp"))
-    self.add_widget(AlarmSetting())
+    self.add_widget(FajrAlarmSetting())
+    self.add_widget(TahajjudAlarmSetting())
     self.add_widget(TemperatureUnitSetting())
 
 
-class AlarmSetting(GridLayout):
+class FajrAlarmSetting(GridLayout):
   def __init__(self, **kwargs):
-    super(AlarmSetting, self).__init__(**kwargs)
+    super(FajrAlarmSetting, self).__init__(**kwargs)
     self.cols = 2
     self.rows = 1
     self.add_widget(Label(text="Set alarm for 10 minutes before Fajr", color=[1, 1, 1, 1],
@@ -377,6 +408,19 @@ class AlarmSetting(GridLayout):
                           size_hint=(1, 0.5), font_size="10sp"))
     self.alarm_checkbox = CheckBox(active=fajr_alarm)
     self.alarm_checkbox.bind(active=update_fajr_alarm)
+    self.add_widget(self.alarm_checkbox)
+
+
+class TahajjudAlarmSetting(GridLayout):
+  def __init__(self, **kwargs):
+    super(TahajjudAlarmSetting, self).__init__(**kwargs)
+    self.cols = 2
+    self.rows = 1
+    self.add_widget(Label(text="Set alarm for last third of night", color=[1, 1, 1, 1],
+                          font_name="RobotoMono-Regular",
+                          size_hint=(1, 0.5), font_size="10sp"))
+    self.alarm_checkbox = CheckBox(active=tahajjud_alarm)
+    self.alarm_checkbox.bind(active=update_tahajjud_alarm)
     self.add_widget(self.alarm_checkbox)
 
 
