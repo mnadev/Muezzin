@@ -1,10 +1,12 @@
 from kivy.core.audio import SoundLoader
+from kivy.uix.button import Button
 from kivy.uix.carousel import Carousel
 from kivy.uix.checkbox import CheckBox
 from kivy.clock import Clock
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import CoreImage, Image
 from kivy.uix.label import Label
+from kivy.uix.popup import Popup
 
 import api_controller as getter
 import arrow
@@ -15,6 +17,7 @@ import re
 fajr_alarm = False
 is_fahrenheit = False
 tahajjud_alarm = False
+keep_playing_alarm = True
 
 
 def update_fajr_alarm(checkbox, value):
@@ -30,6 +33,14 @@ def update_tahajjud_alarm(checkbox, value):
 def update_fahrenheit_boolean(checkbox, value):
   global is_fahrenheit
   is_fahrenheit = value
+
+
+def update_keep_playing_alarm(value):
+  global keep_playing_alarm
+  keep_playing_alarm = value
+  if not value:
+    alarm.stop()
+    keep_playing_alarm = True
 
 
 def celcius_to_fahrenheit(celsius):
@@ -276,6 +287,7 @@ class PrayerPane(GridLayout):
       self.add_widget(self.prayer_time_widgets[prayer_time])
 
     self.get_prayer_times()
+    self.alarm_popup_service = AlarmDismissPopup()
 
   def get_prayer_times(self):
     todays_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_today)
@@ -308,10 +320,18 @@ class PrayerPane(GridLayout):
     return today
 
   def play_alarm(self, *args):
+    if not self.alarm_popup_service.is_open:
+      self.alarm_popup_service.open()
     alarm.play()
 
   def reset_alarm(self, *args):
     alarm.seek(0)
+    global keep_playing_alarm
+    if keep_playing_alarm:
+      Clock.schedule_once(self.play_alarm, 0)
+      Clock.schedule_once(self.reset_alarm, 17)
+    else:
+      keep_playing_alarm = True
 
 
 class PrayerTimeLayout(GridLayout):
@@ -330,6 +350,7 @@ class PrayerTimeLayout(GridLayout):
                                               color=[0, 0, 0, 0.9], font_name="Roboto-BoldItalic", font_size="8sp")
     self.add_widget(self.todays_time_widget)
     self.add_widget(self.tomorrows_time_widget)
+    self.alarm_popup_service = AlarmDismissPopup()
 
   def schedule_adhan(self):
     time_of_prayer = self.get_time_of_prayer(self.todays_times[self.prayer_time])
@@ -350,6 +371,8 @@ class PrayerTimeLayout(GridLayout):
 
   def play_alarm(self, *args):
     alarm.play()
+    if not self.alarm_popup_service.is_open:
+      self.alarm_popup_service.open()
 
   def play_adhan(self, *args):
     adhan.play()
@@ -359,6 +382,12 @@ class PrayerTimeLayout(GridLayout):
 
   def reset_adhan(self, *args):
     adhan.seek(0)
+    global keep_playing_alarm
+    if keep_playing_alarm:
+      Clock.schedule_once(self.play_alarm, 0)
+      Clock.schedule_once(self.reset_alarm, 17)
+    else:
+      keep_playing_alarm = True
 
   def get_time_of_prayer(self, time_string):
     adhan_time = datetime.datetime.strptime(time_string, "%I:%M %p")
@@ -435,3 +464,25 @@ class TemperatureUnitSetting(GridLayout):
     self.temp_checkbox = CheckBox(active=is_fahrenheit)
     self.temp_checkbox.bind(active=update_fahrenheit_boolean)
     self.add_widget(self.temp_checkbox)
+
+
+class AlarmDismissPopup():
+  def __init__(self):
+    self.popup_layout = GridLayout(cols=1, padding=10)
+
+    self.dismiss_button = Button(text="Dismiss")
+    self.dismiss_button.bind(on_press=self.dismiss)
+    self.popup_layout.add_widget(self.dismiss_button)
+
+    self.alarm_popup = Popup(title='Dismiss Alarm', content=self.popup_layout)
+    self.is_open = False
+
+  def dismiss(self, *args):
+    self.alarm_popup.dismiss()
+    update_keep_playing_alarm(False)
+    self.alarm_popup = Popup(title='Dismiss Alarm', content=self.popup_layout)
+    self.is_open = False
+
+  def open(self):
+    self.alarm_popup.open()
+    self.is_open = True
