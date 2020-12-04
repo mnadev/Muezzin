@@ -109,11 +109,11 @@ class WeatherWidget(GridLayout):
     self.low_text = Label()
     self.high_text = Label()
     if is_fahrenheit:
-      self.low_text.text = "High: " + str(celcius_to_fahrenheit(self.weather["max_temp"])) + " °F"
-      self.high_text.text = "Low: " + str(celcius_to_fahrenheit(self.weather["min_temp"])) + " °F"
+      self.low_text.text = "High: " + ('%.2f' % celcius_to_fahrenheit(self.weather["max_temp"])) + " °F"
+      self.high_text.text = "Low: " + ('%.2f' % celcius_to_fahrenheit(self.weather["min_temp"])) + " °F"
     else:
-      self.low_text.text = "High: " + str(self.weather["max_temp"]) + " °C"
-      self.high_text.text = "Low: " + str(self.weather["min_temp"]) + " °C"
+      self.low_text.text = "High: " + ('%.2f' % self.weather["max_temp"]) + " °C"
+      self.high_text.text = "Low: " + ('%.2f' % self.weather["min_temp"]) + " °C"
 
     self.image = Image()
     self.image.texture = CoreImage(self.update_weather_image(self.weather["weather_state_abbr"]), ext='png').texture
@@ -149,11 +149,11 @@ class WeatherWidget(GridLayout):
       self.last_update_time = datetime.datetime.now()
 
     if is_fahrenheit:
-      self.low_text.text = "High: " + str(celcius_to_fahrenheit(self.weather["max_temp"])) + " °F"
-      self.high_text.text = "Low: " + str(celcius_to_fahrenheit(self.weather["min_temp"])) + " °F"
+      self.low_text.text = "High: " + ('%.2f' % celcius_to_fahrenheit(self.weather["max_temp"])) + " °F"
+      self.high_text.text = "Low: " + ('%.2f' % celcius_to_fahrenheit(self.weather["min_temp"])) + " °F"
     else:
-      self.low_text.text = "High: " + str(self.weather["max_temp"]) + " °C"
-      self.high_text.text = "Low: " + str(self.weather["min_temp"]) + " °C"
+      self.low_text.text = "High: " + ('%.2f' % self.weather["max_temp"]) + " °C"
+      self.high_text.text = "Low: " + ('%.2f' % self.weather["min_temp"]) + " °C"
 
 
 class MoonWidget(GridLayout):
