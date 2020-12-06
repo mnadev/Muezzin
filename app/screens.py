@@ -13,28 +13,43 @@ from kivymd.uix.selectioncontrol import MDSwitch
 import api_controller as getter
 import arrow
 import concurrent.futures
+from config_handler import read_from_config, write_to_config
 import datetime
 import re
 
-fajr_alarm = False
-is_fahrenheit = False
-tahajjud_alarm = False
 keep_playing_alarm = True
+
+fajr_alarm, tahajjud_alarm, is_fahrenheit = read_from_config()
 
 
 def update_fajr_alarm(checkbox, value):
   global fajr_alarm
+  global tahajjud_alarm
+  global is_fahrenheit
+
   fajr_alarm = value
+
+  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit)
 
 
 def update_tahajjud_alarm(checkbox, value):
+  global fajr_alarm
   global tahajjud_alarm
+  global is_fahrenheit
+
   tahajjud_alarm = value
+
+  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit)
 
 
 def update_fahrenheit_boolean(checkbox, value):
+  global fajr_alarm
+  global tahajjud_alarm
   global is_fahrenheit
+
   is_fahrenheit = value
+
+  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit)
 
 
 def update_keep_playing_alarm(value):
