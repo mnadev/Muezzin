@@ -1,13 +1,13 @@
 from kivy.core.audio import SoundLoader
+from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.carousel import Carousel
 from kivy.clock import Clock
 from kivy.uix.image import CoreImage, Image
 from kivy.uix.label import Label
 
-from kivy.uix.anchorlayout import AnchorLayout
-from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.button import MDRaisedButton
 from kivymd.uix.dialog import MDDialog
+from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.selectioncontrol import MDSwitch
 
 import api_controller as getter
@@ -281,24 +281,56 @@ class CalendarBox(MDGridLayout):
 
     self.hijri_widget = WrappedLabel(text="14 Ramadan 1440 AH", color=[0.61, 0.81, 0.01, 0.76], font_name="Roboto-Bold",
                                      font_size="16sp", size_hint=(0.5, 1), padding=("10sp", "0sp"))
-    self.update_hijri_date()
+    self.update_hijri()
     # Logo courtesy of flaticon
     self.add_widget(Image(source="res/mosque.png", keep_ratio=True, size_hint_x=0.1, pos=(0, 0)))
     self.add_widget(self.gregorian_widget)
     self.add_widget(self.hijri_widget)
 
-    Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds)
+    Clock.schedule_once(self.update_gregorian, (get_tomorrow_date() - datetime.datetime.now()).seconds)
 
-  def update(self, *args):
+  def update_gregorian(self, *args):
     gregorian_date = getter.get_gregorian_date()
     self.gregorian_widget.text = gregorian_date["formatted_string"]
-    self.update_hijri_date()
-    Clock.schedule_once(self.update, (self.get_tomorrow_date() - datetime.datetime.now()).seconds)
 
-  def update_hijri_date(self):
-    future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_hijri_date)
+    Clock.schedule_once(self.update_gregorian, (self.get_tomorrow_date() - datetime.datetime.now()).seconds)
+
+  def update_hijri(self, *args):
+    is_after_maghrib = self.check_before_after_maghrib()
+    self.update_hijri_date(is_after_maghrib)
+    if is_after_maghrib:
+      Clock.schedule_once(self.update_hijri, (
+              self.get_time_of_prayer(self.get_prayer_times_tomorrow()["Maghrib"],
+                                      shift_tomorrow=True) - datetime.datetime.now()).seconds)
+    else:
+      Clock.schedule_once(self.update_hijri, (
+              self.get_time_of_prayer(self.get_prayer_times()["Maghrib"]) - datetime.datetime.now()).seconds)
+
+  def get_time_of_prayer(self, time_string, shift_tomorrow=False):
+    adhan_time = datetime.datetime.strptime(time_string, "%I:%M %p")
+    today = datetime.datetime.today()
+    today = today.replace(hour=adhan_time.hour, minute=adhan_time.minute, second=0, microsecond=0)
+    if shift_tomorrow:
+      today = today + datetime.timedelta(days=1)
+    return today
+
+  def update_hijri_date(self, is_tomorrow):
+    future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_hijri_date, is_tomorrow)
     hijri_date = future.result()
     self.hijri_widget.text = str(hijri_date['day']) + " " + hijri_date['month'] + " " + str(hijri_date['year']) + " AH"
+
+  def check_before_after_maghrib(self):
+    current_time = datetime.datetime.now()
+    maghrib_today = self.get_time_of_prayer(self.get_prayer_times()["Maghrib"])
+    return current_time > maghrib_today
+
+  def get_prayer_times(self):
+    todays_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_today)
+    return todays_times_future.result()
+
+  def get_prayer_times_tomorrow(self):
+    tomorrow_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_tomorrow)
+    return tomorrow_times_future.result()
 
 
 class PrayerPane(MDGridLayout):

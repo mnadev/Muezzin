@@ -3,12 +3,12 @@ import constants
 from io import BytesIO
 import re
 import requests
-import time
 
 
-def get_hijri_date(time=None):
-  if time is None:
-    time = arrow.now()
+def get_hijri_date(is_tomorrow):
+  time = arrow.now()
+  if is_tomorrow:
+    time = arrow.now().shift(days=1)
   hijri_query = requests.get(constants.HIJRI_DATE_URL, params={"month": time.date().strftime("%m"),
                                                                "day": time.date().strftime("%d"),
                                                                "year": time.date().strftime("%Y"),
