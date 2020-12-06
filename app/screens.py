@@ -3,20 +3,18 @@ from kivy.uix.carousel import Carousel
 from kivy.clock import Clock
 from kivy.uix.image import CoreImage, Image
 from kivy.uix.label import Label
-from kivy.uix.popup import Popup
 
-from kivymd.uix.gridlayout import MDGridLayout
 from kivy.uix.anchorlayout import AnchorLayout
+from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.button import MDRaisedButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.selectioncontrol import MDSwitch
-from kivymd.uix.label import MDLabel
+
 import api_controller as getter
 import arrow
 import concurrent.futures
 import datetime
 import re
-import time
 
 fajr_alarm = False
 is_fahrenheit = False
@@ -45,7 +43,6 @@ def update_keep_playing_alarm(value):
   keep_playing_alarm = value
   if not value:
     alarm.stop()
-    time.sleep(1)
     alarm.seek(0)
 
 
