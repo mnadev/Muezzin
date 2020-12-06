@@ -41,12 +41,12 @@ def update_fahrenheit_boolean(checkbox, value):
 
 def update_keep_playing_alarm(value):
   global keep_playing_alarm
+
   keep_playing_alarm = value
   if not value:
     alarm.stop()
     time.sleep(1)
     alarm.seek(0)
-    keep_playing_alarm = True
 
 
 def celcius_to_fahrenheit(celsius):
@@ -361,6 +361,7 @@ class PrayerPane(MDGridLayout):
   def reset_alarm(self, *args):
     alarm.seek(0)
     global keep_playing_alarm
+
     if keep_playing_alarm:
       Clock.schedule_once(self.play_alarm, 0)
       Clock.schedule_once(self.reset_alarm, 17)
@@ -415,15 +416,16 @@ class PrayerTimeLayout(MDGridLayout):
 
   def reset_alarm(self, *args):
     alarm.seek(0)
-
-  def reset_adhan(self, *args):
-    adhan.seek(0)
     global keep_playing_alarm
+
     if keep_playing_alarm:
       Clock.schedule_once(self.play_alarm, 0)
       Clock.schedule_once(self.reset_alarm, 17)
     else:
       keep_playing_alarm = True
+
+  def reset_adhan(self, *args):
+    adhan.seek(0)
 
   def get_time_of_prayer(self, time_string):
     adhan_time = datetime.datetime.strptime(time_string, "%I:%M %p")
