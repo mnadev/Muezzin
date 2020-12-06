@@ -16,6 +16,7 @@ _, _, _, enable_dark_mode = read_from_config()
 
 class MuezzinApp(MDApp):
   def build(self):
+    self.icon = "res/mosque_new.png"
     self.theme_cls.primary_palette = "Green"
     self.theme_cls.primary_hue = "600"
     if enable_dark_mode:
