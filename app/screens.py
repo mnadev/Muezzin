@@ -271,9 +271,9 @@ class MoonWidget(MDGridLayout):
     elif moon_phase_text.lower() == "new moon":
       return "res/new_moon.png"
     elif moon_phase_text.lower() == "first quarter":
-      return "res/full_moon.png"
+      return "res/first_quarter.png"
     elif moon_phase_text.lower() == "last quarter":
-      return "res/full_moon.png"
+      return "res/third_quarter.png"
     else:
       split_moon_phase = re.compile("\((.*)\)").split(moon_phase_text)
       percentage = split_moon_phase[1][:-1]
@@ -333,7 +333,10 @@ class CalendarBox(MDGridLayout):
                                      font_size="16sp", size_hint=(0.5, 1), padding=("10sp", "0sp"))
     self.update_hijri()
     # Logo courtesy of flaticon
-    self.add_widget(Image(source="res/mosque.png", keep_ratio=True, size_hint_x=0.1, pos=(0, 0)))
+    if enable_dark_mode:
+      self.add_widget(Image(source="res/mosque_white.png", keep_ratio=True, size_hint_x=0.1, pos=(0, 0)))
+    else:
+      self.add_widget(Image(source="res/mosque_dark.png", keep_ratio=True, size_hint_x=0.1, pos=(0, 0)))
     self.add_widget(self.gregorian_widget)
     self.add_widget(self.hijri_widget)
 
