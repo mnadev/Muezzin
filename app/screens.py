@@ -5,6 +5,7 @@ from kivy.clock import Clock
 from kivy.uix.image import CoreImage, Image
 from kivy.uix.label import Label
 
+from kivymd.app import MDApp
 from kivymd.uix.button import MDRaisedButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.gridlayout import MDGridLayout
@@ -19,37 +20,71 @@ import re
 
 keep_playing_alarm = True
 
-fajr_alarm, tahajjud_alarm, is_fahrenheit = read_from_config()
+fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode = read_from_config()
 
 
 def update_fajr_alarm(checkbox, value):
   global fajr_alarm
   global tahajjud_alarm
   global is_fahrenheit
+  global enable_dark_mode
 
   fajr_alarm = value
 
-  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit)
+  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode)
+
+
+default_text_color = [0.65, 0.81, 0.17, 1]
+default_clock_color = [0, 0, 0, 1]
+
+if enable_dark_mode:
+  default_text_color = [0.61, 0.81, 0.01, 0.76]
+  default_clock_color = [1, 1, 1, 1]
 
 
 def update_tahajjud_alarm(checkbox, value):
   global fajr_alarm
   global tahajjud_alarm
   global is_fahrenheit
+  global enable_dark_mode
 
   tahajjud_alarm = value
 
-  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit)
+  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode)
 
 
 def update_fahrenheit_boolean(checkbox, value):
   global fajr_alarm
   global tahajjud_alarm
   global is_fahrenheit
+  global enable_dark_mode
 
   is_fahrenheit = value
 
-  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit)
+  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode)
+
+
+def update_enable_dark_mode(checkbox, value):
+  global fajr_alarm
+  global tahajjud_alarm
+  global is_fahrenheit
+  global enable_dark_mode
+
+  if value != enable_dark_mode:
+    enable_dark_mode = value
+    write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode)
+
+    exit_button = MDRaisedButton(text="Exit App")
+    exit_button.bind(on_press=close_app)
+
+    restart_popup = MDDialog(title='To update changes, you must restart app.',
+                             size_hint=(0.75, 0.75),
+                             buttons=[exit_button])
+    restart_popup.open()
+
+
+def close_app(*args):
+  MDApp.get_running_app().stop()
 
 
 def update_keep_playing_alarm(value):
@@ -105,11 +140,11 @@ class InformationScreen(MDGridLayout):
     self.rows = 4
     self.moon_widget = MoonWidget()
     self.weather_widget = WeatherWidget()
-    self.add_widget(Label(text="Current moon phase", color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular",
+    self.add_widget(Label(text="Current moon phase", color=default_text_color, font_name="RobotoMono-Regular",
                           size_hint=(0.5, 0.5), font_size="25sp"))
     self.add_widget(self.moon_widget)
     self.add_widget(
-      Label(text="Current Weather", color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular", size_hint=(1, 0.5),
+      Label(text="Current Weather", color=default_text_color, font_name="RobotoMono-Regular", size_hint=(1, 0.5),
             font_size="25sp"))
     self.add_widget(self.weather_widget)
 
@@ -127,13 +162,13 @@ class WeatherWidget(MDGridLayout):
     self.update_weather_location_woeid()
     self.weather = self.update_weather()
 
-    self.weather_text = Label(text=self.weather["weather_state_name"], color=[0.61, 0.81, 0.01, 0.76],
+    self.weather_text = Label(text=self.weather["weather_state_name"], color=default_text_color,
                               font_name="RobotoMono-Regular", size_hint=(1, 1), font_size="15sp")
-    self.current_text = Label(color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular", size_hint=(1, 1),
+    self.current_text = Label(color=default_text_color, font_name="RobotoMono-Regular", size_hint=(1, 1),
                               font_size="15sp")
-    self.low_text = Label(color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular", size_hint=(1, 1),
+    self.low_text = Label(color=default_text_color, font_name="RobotoMono-Regular", size_hint=(1, 1),
                           font_size="10sp")
-    self.high_text = Label(color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular", size_hint=(1, 1),
+    self.high_text = Label(color=default_text_color, font_name="RobotoMono-Regular", size_hint=(1, 1),
                            font_size="10sp")
     if is_fahrenheit:
       self.current_text.text = "Current: " + ('%.2f' % celcius_to_fahrenheit(self.weather["the_temp"])) + " °F"
@@ -209,7 +244,7 @@ class MoonWidget(MDGridLayout):
     self.size_hint = (0.8, 0.8)
     self.orientation = "horizontal"
     self.moon_text = Label(text=moon_phase["phase"][arrow.now().strftime("%-d")]["npWidget"],
-                           color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular", size_hint=(1, 1),
+                           color=default_text_color, font_name="RobotoMono-Regular", size_hint=(1, 1),
                            font_size="15sp")
     self.image = Image(source=self.get_moon_pic(moon_phase["phase"][arrow.now().strftime("%-d")]["npWidget"]))
 
@@ -270,7 +305,7 @@ class TimePane(MDGridLayout):
     super(TimePane, self).__init__(**kwargs)
     self.cols = 1
     self.rows = 2
-    self.time_widget = Label(text=datetime.datetime.now().strftime("%I:%M %p"), color=[1, 1, 1, 1],
+    self.time_widget = Label(text=datetime.datetime.now().strftime("%I:%M %p"), color=default_clock_color,
                              font_name="RobotoMono-Regular",
                              size_hint=(1, 0.5), font_size="50sp")
 
@@ -290,11 +325,11 @@ class CalendarBox(MDGridLayout):
     self.cols = 3
     self.rows = 1
     gregorian_date = getter.get_gregorian_date()
-    self.gregorian_widget = WrappedLabel(text=gregorian_date["formatted_string"], color=[0.61, 0.81, 0.01, 0.76],
+    self.gregorian_widget = WrappedLabel(text=gregorian_date["formatted_string"], color=default_text_color,
                                          font_name="Roboto-Bold", font_size="16sp", size_hint=(0.5, 1),
                                          padding=("10sp", "0sp"))
 
-    self.hijri_widget = WrappedLabel(text="14 Ramadan 1440 AH", color=[0.61, 0.81, 0.01, 0.76], font_name="Roboto-Bold",
+    self.hijri_widget = WrappedLabel(text="14 Ramadan 1440 AH", color=default_text_color, font_name="Roboto-Bold",
                                      font_size="16sp", size_hint=(0.5, 1), padding=("10sp", "0sp"))
     self.update_hijri()
     # Logo courtesy of flaticon
@@ -424,10 +459,10 @@ class PrayerTimeLayout(MDGridLayout):
     self.tomorrow_times = tomorrow_times
 
     self.todays_time_widget = WrappedLabel(text=self.prayer_time + ": " + self.todays_times[self.prayer_time],
-                                           color=[0.61, 0.81, 0.01, 0.76], font_name="Roboto-BoldItalic",
+                                           color=default_text_color, font_name="Roboto-BoldItalic",
                                            font_size="15sp")
     self.tomorrows_time_widget = WrappedLabel(text="Tomorrow: " + self.tomorrow_times[self.prayer_time],
-                                              color=[0.61, 0.81, 0.01, 0.76], font_name="Roboto-BoldItalic",
+                                              color=default_text_color, font_name="Roboto-BoldItalic",
                                               font_size="8sp")
     self.add_widget(self.todays_time_widget)
     self.add_widget(self.tomorrows_time_widget)
@@ -499,14 +534,15 @@ class SettingsScreen(MDGridLayout):
   def __init__(self, **kwargs):
     super(SettingsScreen, self).__init__(**kwargs)
     self.cols = 1
-    self.rows = 4
+    self.rows = 5
 
-    self.add_widget(Label(text="Settings", color=[0.61, 0.81, 0.01, 0.76],
+    self.add_widget(Label(text="Settings", color=default_text_color,
                           font_name="RobotoMono-Regular",
                           size_hint=(1, 0.5), font_size="40sp"))
     self.add_widget(FajrAlarmSetting())
     self.add_widget(TahajjudAlarmSetting())
     self.add_widget(TemperatureUnitSetting())
+    self.add_widget(EnableDarkModeSetting())
 
 
 class FajrAlarmSetting(AnchorLayout):
@@ -515,7 +551,7 @@ class FajrAlarmSetting(AnchorLayout):
 
     self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
     self.text_anchor_layout.add_widget(
-      Label(text="Set alarm for 10 minutes before Fajr", color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular",
+      Label(text="Set alarm for 10 minutes before Fajr", color=default_text_color, font_name="RobotoMono-Regular",
             size_hint=(1, 0.5), font_size="10sp"))
 
     self.alarm_checkbox = MDSwitch(active=fajr_alarm)
@@ -532,7 +568,7 @@ class TahajjudAlarmSetting(AnchorLayout):
     super(TahajjudAlarmSetting, self).__init__(**kwargs)
 
     self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
-    self.text_anchor_layout.add_widget(Label(text="Set alarm for last third of night", color=[0.61, 0.81, 0.01, 0.76],
+    self.text_anchor_layout.add_widget(Label(text="Set alarm for last third of night", color=default_text_color,
                                              font_name="RobotoMono-Regular",
                                              size_hint=(1, 0.5), font_size="10sp"))
 
@@ -550,7 +586,7 @@ class TemperatureUnitSetting(AnchorLayout):
     super(TemperatureUnitSetting, self).__init__(**kwargs)
     self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
     self.text_anchor_layout.add_widget(
-      Label(text="Check for Fahrenheit (default: Celcius)", color=[0.61, 0.81, 0.01, 0.76],
+      Label(text="Check for Fahrenheit (default: Celcius)", color=default_text_color,
             font_name="RobotoMono-Regular",
             size_hint=(1, 0.5), font_size="10sp"))
 
@@ -561,6 +597,23 @@ class TemperatureUnitSetting(AnchorLayout):
 
     self.add_widget(self.text_anchor_layout)
     self.add_widget(self.temp_checkbox_anchor_layout)
+
+
+class EnableDarkModeSetting(AnchorLayout):
+  def __init__(self, **kwargs):
+    super(EnableDarkModeSetting, self).__init__(**kwargs)
+    self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
+    self.text_anchor_layout.add_widget(
+      Label(text="Enable Dark Mode", color=default_text_color, font_name="RobotoMono-Regular", size_hint=(1, 0.5),
+            font_size="10sp"))
+
+    self.dark_mode_checkbox = MDSwitch(active=enable_dark_mode)
+    self.dark_mode_checkbox.bind(active=update_enable_dark_mode)
+    self.dark_mode_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='center')
+    self.dark_mode_checkbox_anchor_layout.add_widget(self.dark_mode_checkbox)
+
+    self.add_widget(self.text_anchor_layout)
+    self.add_widget(self.dark_mode_checkbox_anchor_layout)
 
 
 class AlarmDismissPopup:
