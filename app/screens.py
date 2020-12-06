@@ -1,18 +1,22 @@
 from kivy.core.audio import SoundLoader
-from kivy.uix.button import Button
 from kivy.uix.carousel import Carousel
-from kivy.uix.checkbox import CheckBox
 from kivy.clock import Clock
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import CoreImage, Image
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 
+from kivymd.uix.gridlayout import MDGridLayout
+from kivy.uix.anchorlayout import AnchorLayout
+from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.selectioncontrol import MDSwitch
+from kivymd.uix.label import MDLabel
 import api_controller as getter
 import arrow
 import concurrent.futures
 import datetime
 import re
+import time
 
 fajr_alarm = False
 is_fahrenheit = False
@@ -40,6 +44,7 @@ def update_keep_playing_alarm(value):
   keep_playing_alarm = value
   if not value:
     alarm.stop()
+    time.sleep(1)
     alarm.seek(0)
     keep_playing_alarm = True
 
@@ -81,14 +86,19 @@ class MuezzinCarousel(Carousel):
     Carousel.on_index(self, *args)
 
 
-class InformationScreen(GridLayout):
+class InformationScreen(MDGridLayout):
   def __init__(self, **kwargs):
     super(InformationScreen, self).__init__(**kwargs)
-    self.cols = 2
-    self.rows = 1
+    self.cols = 1
+    self.rows = 4
     self.moon_widget = MoonWidget()
     self.weather_widget = WeatherWidget()
+    self.add_widget(Label(text="Current moon phase", color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular",
+                          size_hint=(0.5, 0.5), font_size="25sp"))
     self.add_widget(self.moon_widget)
+    self.add_widget(
+      Label(text="Current Weather", color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular", size_hint=(1, 0.5),
+            font_size="25sp"))
     self.add_widget(self.weather_widget)
 
   def update(self):
@@ -96,32 +106,52 @@ class InformationScreen(GridLayout):
     self.weather_widget.update()
 
 
-class WeatherWidget(GridLayout):
+class WeatherWidget(MDGridLayout):
   def __init__(self, **kwargs):
     super(WeatherWidget, self).__init__(**kwargs)
     self.cols = 2
-    self.rows = 2
+    self.rows = 3
     self.woeid = None
     self.update_weather_location_woeid()
     self.weather = self.update_weather()
 
-    self.weather_text = Label(text=self.weather["weather_state_name"])
-    self.low_text = Label()
-    self.high_text = Label()
+    self.weather_text = Label(text=self.weather["weather_state_name"], color=[0.61, 0.81, 0.01, 0.76],
+                              font_name="RobotoMono-Regular", size_hint=(1, 1), font_size="15sp")
+    self.current_text = Label(color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular", size_hint=(1, 1),
+                              font_size="15sp")
+    self.low_text = Label(color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular", size_hint=(1, 1),
+                          font_size="10sp")
+    self.high_text = Label(color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular", size_hint=(1, 1),
+                           font_size="10sp")
     if is_fahrenheit:
+      self.current_text.text = "Current: " + ('%.2f' % celcius_to_fahrenheit(self.weather["the_temp"])) + " °F"
       self.low_text.text = "High: " + ('%.2f' % celcius_to_fahrenheit(self.weather["max_temp"])) + " °F"
       self.high_text.text = "Low: " + ('%.2f' % celcius_to_fahrenheit(self.weather["min_temp"])) + " °F"
     else:
+      self.current_text.text = "Current: " + ('%.2f' % self.weather["the_temp"]) + " °C"
       self.low_text.text = "High: " + ('%.2f' % self.weather["max_temp"]) + " °C"
       self.high_text.text = "Low: " + ('%.2f' % self.weather["min_temp"]) + " °C"
 
     self.image = Image()
     self.image.texture = CoreImage(self.update_weather_image(self.weather["weather_state_abbr"]), ext='png').texture
 
-    self.add_widget(self.image)
-    self.add_widget(self.weather_text)
-    self.add_widget(self.high_text)
-    self.add_widget(self.low_text)
+    self.weather_text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
+    self.current_text_anchor_layout = AnchorLayout(anchor_x='right', anchor_y='top')
+    self.low_text_anchor_layout = AnchorLayout(anchor_x='right', anchor_y='bottom')
+    self.high_text_anchor_layout = AnchorLayout(anchor_x='right', anchor_y='center')
+    self.image_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='bottom')
+
+    self.weather_text_anchor_layout.add_widget(self.weather_text)
+    self.current_text_anchor_layout.add_widget(self.current_text)
+    self.high_text_anchor_layout.add_widget(self.low_text)
+    self.low_text_anchor_layout.add_widget(self.high_text)
+    self.image_anchor_layout.add_widget(self.image)
+
+    self.add_widget(self.weather_text_anchor_layout)
+    self.add_widget(self.current_text_anchor_layout)
+    self.add_widget(self.high_text_anchor_layout)
+    self.add_widget(self.image_anchor_layout)
+    self.add_widget(self.low_text_anchor_layout)
     self.last_update_time = datetime.datetime.now()
 
   def update_weather_image(self, weather_state_abbr):
@@ -149,21 +179,26 @@ class WeatherWidget(GridLayout):
       self.last_update_time = datetime.datetime.now()
 
     if is_fahrenheit:
+      self.current_text.text = "Current: " + ('%.2f' % celcius_to_fahrenheit(self.weather["the_temp"])) + " °F"
       self.low_text.text = "High: " + ('%.2f' % celcius_to_fahrenheit(self.weather["max_temp"])) + " °F"
       self.high_text.text = "Low: " + ('%.2f' % celcius_to_fahrenheit(self.weather["min_temp"])) + " °F"
     else:
+      self.current_text.text = "Current: " + ('%.2f' % self.weather["the_temp"]) + " °C"
       self.low_text.text = "High: " + ('%.2f' % self.weather["max_temp"]) + " °C"
       self.high_text.text = "Low: " + ('%.2f' % self.weather["min_temp"]) + " °C"
 
 
-class MoonWidget(GridLayout):
+class MoonWidget(MDGridLayout):
   def __init__(self, **kwargs):
     super(MoonWidget, self).__init__(**kwargs)
     self.cols = 1
     self.rows = 2
     moon_phase = self.update_moon_phase()
-
-    self.moon_text = Label(text=moon_phase["phase"][arrow.now().strftime("%-d")]["npWidget"])
+    self.size_hint = (0.8, 0.8)
+    self.orientation = "horizontal"
+    self.moon_text = Label(text=moon_phase["phase"][arrow.now().strftime("%-d")]["npWidget"],
+                           color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular", size_hint=(1, 1),
+                           font_size="15sp")
     self.image = Image(source=self.get_moon_pic(moon_phase["phase"][arrow.now().strftime("%-d")]["npWidget"]))
 
     self.add_widget(self.moon_text)
@@ -207,7 +242,7 @@ class MoonWidget(GridLayout):
           return "res/waxing_gibbous.png"
 
 
-class MainScreen(GridLayout):
+class MainScreen(MDGridLayout):
   def __init__(self, **kwargs):
     super(MainScreen, self).__init__(**kwargs)
     self.cols = 2
@@ -218,7 +253,7 @@ class MainScreen(GridLayout):
     self.add_widget(self.prayer_pane)
 
 
-class TimePane(GridLayout):
+class TimePane(MDGridLayout):
   def __init__(self, **kwargs):
     super(TimePane, self).__init__(**kwargs)
     self.cols = 1
@@ -237,18 +272,17 @@ class TimePane(GridLayout):
     Clock.schedule_once(self.update, 60 - datetime.datetime.now().second % 60)
 
 
-class CalendarBox(GridLayout):
+class CalendarBox(MDGridLayout):
   def __init__(self, **kwargs):
     super(CalendarBox, self).__init__(**kwargs)
     self.cols = 3
     self.rows = 1
-
     gregorian_date = getter.get_gregorian_date()
-    self.gregorian_widget = WrappedLabel(text=gregorian_date["formatted_string"], color=[0, 0, 0, 1],
+    self.gregorian_widget = WrappedLabel(text=gregorian_date["formatted_string"], color=[0.61, 0.81, 0.01, 0.76],
                                          font_name="Roboto-Bold", font_size="16sp", size_hint=(0.5, 1),
                                          padding=("10sp", "0sp"))
 
-    self.hijri_widget = WrappedLabel(text="14 Ramadan 1440 AH", color=[0, 0, 0, 1], font_name="Roboto-Bold",
+    self.hijri_widget = WrappedLabel(text="14 Ramadan 1440 AH", color=[0.61, 0.81, 0.01, 0.76], font_name="Roboto-Bold",
                                      font_size="16sp", size_hint=(0.5, 1), padding=("10sp", "0sp"))
     self.update_hijri_date()
     # Logo courtesy of flaticon
@@ -270,7 +304,7 @@ class CalendarBox(GridLayout):
     self.hijri_widget.text = str(hijri_date['day']) + " " + hijri_date['month'] + " " + str(hijri_date['year']) + " AH"
 
 
-class PrayerPane(GridLayout):
+class PrayerPane(MDGridLayout):
   def __init__(self, **kwargs):
     super(PrayerPane, self).__init__(**kwargs)
     self.cols = 1
@@ -310,7 +344,6 @@ class PrayerPane(GridLayout):
     time_between_fajr_isha = (tomorrows_fajr - todays_isha).total_seconds()
     third_of_night = 2 / 3 * time_between_fajr_isha
     time_of_alarm = todays_isha + datetime.timedelta(seconds=third_of_night)
-
     Clock.schedule_once(self.play_alarm, (time_of_alarm - datetime.datetime.now()).total_seconds())
     Clock.schedule_once(self.reset_alarm, (time_of_alarm - datetime.datetime.now()).total_seconds() + 17)
 
@@ -335,7 +368,7 @@ class PrayerPane(GridLayout):
       keep_playing_alarm = True
 
 
-class PrayerTimeLayout(GridLayout):
+class PrayerTimeLayout(MDGridLayout):
   def __init__(self, prayer_time, todays_times, tomorrow_times, **kwargs):
     super(PrayerTimeLayout, self).__init__(**kwargs)
     self.cols = 1
@@ -346,9 +379,11 @@ class PrayerTimeLayout(GridLayout):
     self.tomorrow_times = tomorrow_times
 
     self.todays_time_widget = WrappedLabel(text=self.prayer_time + ": " + self.todays_times[self.prayer_time],
-                                           color=[0, 0, 0, 1], font_name="Roboto-BoldItalic", font_size="15sp")
+                                           color=[0.61, 0.81, 0.01, 0.76], font_name="Roboto-BoldItalic",
+                                           font_size="15sp")
     self.tomorrows_time_widget = WrappedLabel(text="Tomorrow: " + self.tomorrow_times[self.prayer_time],
-                                              color=[0, 0, 0, 0.9], font_name="Roboto-BoldItalic", font_size="8sp")
+                                              color=[0.61, 0.81, 0.01, 0.76], font_name="Roboto-BoldItalic",
+                                              font_size="8sp")
     self.add_widget(self.todays_time_widget)
     self.add_widget(self.tomorrows_time_widget)
     self.alarm_popup_service = AlarmDismissPopup()
@@ -414,74 +449,90 @@ class WrappedLabel(Label):
       texture_size=lambda *x: self.setter('height')(self, self.texture_size[1]))
 
 
-class SettingsScreen(GridLayout):
+class SettingsScreen(MDGridLayout):
   def __init__(self, **kwargs):
     super(SettingsScreen, self).__init__(**kwargs)
     self.cols = 1
     self.rows = 4
 
-    self.add_widget(Label(text="Settings", color=[1, 1, 1, 1],
+    self.add_widget(Label(text="Settings", color=[0.61, 0.81, 0.01, 0.76],
                           font_name="RobotoMono-Regular",
-                          size_hint=(1, 0.5), font_size="30sp"))
+                          size_hint=(1, 0.5), font_size="40sp"))
     self.add_widget(FajrAlarmSetting())
     self.add_widget(TahajjudAlarmSetting())
     self.add_widget(TemperatureUnitSetting())
 
 
-class FajrAlarmSetting(GridLayout):
+class FajrAlarmSetting(AnchorLayout):
   def __init__(self, **kwargs):
     super(FajrAlarmSetting, self).__init__(**kwargs)
-    self.cols = 2
-    self.rows = 1
-    self.add_widget(Label(text="Set alarm for 10 minutes before Fajr", color=[1, 1, 1, 1],
-                          font_name="RobotoMono-Regular",
-                          size_hint=(1, 0.5), font_size="10sp"))
-    self.alarm_checkbox = CheckBox(active=fajr_alarm)
+
+    self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
+    self.text_anchor_layout.add_widget(
+      Label(text="Set alarm for 10 minutes before Fajr", color=[0.61, 0.81, 0.01, 0.76], font_name="RobotoMono-Regular",
+            size_hint=(1, 0.5), font_size="10sp"))
+
+    self.alarm_checkbox = MDSwitch(active=fajr_alarm)
     self.alarm_checkbox.bind(active=update_fajr_alarm)
-    self.add_widget(self.alarm_checkbox)
+    self.alarm_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='center')
+    self.alarm_checkbox_anchor_layout.add_widget(self.alarm_checkbox)
+
+    self.add_widget(self.text_anchor_layout)
+    self.add_widget(self.alarm_checkbox_anchor_layout)
 
 
-class TahajjudAlarmSetting(GridLayout):
+class TahajjudAlarmSetting(AnchorLayout):
   def __init__(self, **kwargs):
     super(TahajjudAlarmSetting, self).__init__(**kwargs)
-    self.cols = 2
-    self.rows = 1
-    self.add_widget(Label(text="Set alarm for last third of night", color=[1, 1, 1, 1],
-                          font_name="RobotoMono-Regular",
-                          size_hint=(1, 0.5), font_size="10sp"))
-    self.alarm_checkbox = CheckBox(active=tahajjud_alarm)
+
+    self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
+    self.text_anchor_layout.add_widget(Label(text="Set alarm for last third of night", color=[0.61, 0.81, 0.01, 0.76],
+                                             font_name="RobotoMono-Regular",
+                                             size_hint=(1, 0.5), font_size="10sp"))
+
+    self.alarm_checkbox = MDSwitch(active=tahajjud_alarm)
     self.alarm_checkbox.bind(active=update_tahajjud_alarm)
-    self.add_widget(self.alarm_checkbox)
+    self.alarm_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='center')
+    self.alarm_checkbox_anchor_layout.add_widget(self.alarm_checkbox)
+
+    self.add_widget(self.text_anchor_layout)
+    self.add_widget(self.alarm_checkbox_anchor_layout)
 
 
-class TemperatureUnitSetting(GridLayout):
+class TemperatureUnitSetting(AnchorLayout):
   def __init__(self, **kwargs):
     super(TemperatureUnitSetting, self).__init__(**kwargs)
-    self.cols = 2
-    self.rows = 1
-    self.add_widget(Label(text="Check for Fahrenheit (default: Celcius)", color=[1, 1, 1, 1],
-                          font_name="RobotoMono-Regular",
-                          size_hint=(1, 0.5), font_size="10sp"))
-    self.temp_checkbox = CheckBox(active=is_fahrenheit)
+    self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
+    self.text_anchor_layout.add_widget(
+      Label(text="Check for Fahrenheit (default: Celcius)", color=[0.61, 0.81, 0.01, 0.76],
+            font_name="RobotoMono-Regular",
+            size_hint=(1, 0.5), font_size="10sp"))
+
+    self.temp_checkbox = MDSwitch(active=is_fahrenheit)
     self.temp_checkbox.bind(active=update_fahrenheit_boolean)
-    self.add_widget(self.temp_checkbox)
+    self.temp_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='center')
+    self.temp_checkbox_anchor_layout.add_widget(self.temp_checkbox)
+
+    self.add_widget(self.text_anchor_layout)
+    self.add_widget(self.temp_checkbox_anchor_layout)
 
 
-class AlarmDismissPopup():
+class AlarmDismissPopup:
   def __init__(self):
-    self.popup_layout = GridLayout(cols=1, padding=10)
+    self.popup_layout = MDGridLayout(cols=1, padding=10)
 
-    self.dismiss_button = Button(text="Dismiss")
+    self.dismiss_button = MDRaisedButton(text="Dismiss")
     self.dismiss_button.bind(on_press=self.dismiss)
-    self.popup_layout.add_widget(self.dismiss_button)
 
-    self.alarm_popup = Popup(title='Dismiss Alarm', content=self.popup_layout)
+    self.alarm_popup = MDDialog(title='Dismiss Alarm',
+                                size_hint=(0.75, 0.75),
+                                buttons=[self.dismiss_button])
+    self.alarm_popup.on_touch_up(self.dismiss)
     self.is_open = False
 
   def dismiss(self, *args):
     self.alarm_popup.dismiss()
     update_keep_playing_alarm(False)
-    self.alarm_popup = Popup(title='Dismiss Alarm', content=self.popup_layout)
     self.is_open = False
 
   def open(self):

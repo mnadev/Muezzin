@@ -7,15 +7,15 @@ from kivy.config import Config
 Config.set('graphics', 'width', '480')
 Config.set('graphics', 'height', '320')
 
-from kivy.app import App
-from kivy.core.window import Window
+from kivymd.app import MDApp
 from screens import MuezzinCarousel
 
-Window.clearcolor = (0.1, 0.61, 0.2, 0.91)
 
-
-class MuezzinApp(App):
+class MuezzinApp(MDApp):
   def build(self):
+    self.theme_cls.primary_palette = "Green"
+    self.theme_cls.primary_hue = "600"
+    self.theme_cls.theme_style = "Dark"
     return MuezzinCarousel(direction='right')
 
 
