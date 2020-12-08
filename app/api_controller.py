@@ -6,6 +6,11 @@ import requests
 
 
 def get_hijri_date(is_tomorrow):
+  """
+  Gets the hijri date
+  :param is_tomorrow: A boolean stating if it's after maghrib, and we want to update the hijri date to the next day.
+  :return: Information about the hijri date in a dict format.
+  """
   time = arrow.now()
   if is_tomorrow:
     time = arrow.now().shift(days=1)
@@ -27,6 +32,10 @@ def get_hijri_date(is_tomorrow):
 
 
 def get_gregorian_date():
+  """
+  Gets today's gregorian date
+  :return: Information about the current gregorian date in a dict format.
+  """
   time = arrow.now()
 
   gregorian_date = dict()
@@ -40,6 +49,10 @@ def get_gregorian_date():
 
 
 def get_location():
+  """
+  Gets the location using a Geolocation API.
+  :return: The location response
+  """
   location_response = requests.get(constants.GEOLOCATION_URL)
   if location_response.status_code != 200:
     return None
@@ -47,6 +60,15 @@ def get_location():
 
 
 def _get_prayer_times(country, zipcode, latitude, longitude, time_zone, time=arrow.now()):
+  """
+  Gets prayer times for the defined parameters, including the defined time
+  :param country: The country where you want prayer times
+  :param zipcode: The zipcode where you want prayer times
+  :param latitude: The latitude where you want prayer times
+  :param longitude: The longitude where you want prayer times
+  :param time_zone: The time zone where you want prayer times
+  :return: Prayer times in dict format
+  """
   location = get_location()
 
   if latitude is None or longitude is None:
@@ -82,21 +104,48 @@ def _get_prayer_times(country, zipcode, latitude, longitude, time_zone, time=arr
 
 
 def get_prayer_times_today(country=None, zipcode=None, latitude=None, longitude=None, time_zone=None):
+  """
+  Gets prayer times for today for the given parameters.
+  :param country: The country where you want prayer times
+  :param zipcode: The zipcode where you want prayer times
+  :param latitude: The latitude where you want prayer times
+  :param longitude: The longitude where you want prayer times
+  :param time_zone: The time zone where you want prayer times
+  :return: Today's prayer times in dict format
+  """
   return _get_prayer_times(country=country, zipcode=zipcode, latitude=latitude, longitude=longitude,
                            time_zone=time_zone)
 
 
 def get_prayer_times_tomorrow(country=None, zipcode=None, latitude=None, longitude=None, time_zone=None):
+  """
+  Gets prayer times for tomorrow for the given parameters.
+  :param country: The country where you want prayer times
+  :param zipcode: The zipcode where you want prayer times
+  :param latitude: The latitude where you want prayer times
+  :param longitude: The longitude where you want prayer times
+  :param time_zone: The time zone where you want prayer times
+  :return: Tomorrow's prayer times in dict format
+  """
   return _get_prayer_times(country=country, zipcode=zipcode, latitude=latitude, longitude=longitude,
                            time_zone=time_zone, time=arrow.now().shift(days=1))
 
 
 def get_weather_image(weather_abbrv):
+  """
+  Gets an image of the current weather condition from the API
+  :param weather_abbrv: An abbreviation of the current weather condition, as defined by the weather API
+  :return: The image bytes of the weather icon
+  """
   image_request = requests.get(constants.WEATHER_API_ICONS_BASE_URL + weather_abbrv + ".png")
   return BytesIO(image_request.content)
 
 
 def get_weather_location_woeid():
+  """
+  Gets woeid (ID) for a certain location after giving the latitude and longitude
+  :return: The response from the weather API giving the woeid
+  """
   location = get_location()
   latitude = location["latitude"]
   longitude = location["longitude"]
@@ -106,11 +155,20 @@ def get_weather_location_woeid():
 
 
 def get_weather(woeid):
+  """
+  Gets weather for a certain location represented by the woeid
+  :param woeid: The id representing the location
+  :return: The response from the weather API
+  """
   weather_request = requests.get(constants.WEATHER_API_URL + str(woeid))
   return weather_request.json()["consolidated_weather"][4]
 
 
 def get_moon_phase():
+  """
+  Make request for today's moon phase to Moon Phase API and obtain response
+  :return: The response from the Moon Phase API
+  """
   time = arrow.now()
   params = {
     "lang": "en",

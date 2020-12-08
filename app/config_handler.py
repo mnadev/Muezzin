@@ -7,6 +7,10 @@ FILE = FILE_PATH + 'muezzin_config.ini'
 Path(FILE_PATH).mkdir(parents=True, exist_ok=True)
 
 def read_from_config():
+  """
+  Reads the various setting parameters from a config file.
+  :return: The following setting parameters: fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode
+  """
   config_file = Path(FILE)
   if not config_file.exists():
     return False, False, False, False
@@ -23,6 +27,14 @@ def read_from_config():
 
 
 def write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode):
+  """
+  Write the various setting parameters to a config file to save setting state.
+  :param fajr_alarm: Boolean controlling the fajr alarm
+  :param tahajjud_alarm: Boolean controlling the tahajjud alarm
+  :param is_fahrenheit: Boolean controlling fahrenheit/celcius
+  :param enable_dark_mode: Boolean controlling dark mode
+  :return: None
+  """
   file = Path(FILE)
   file.touch(exist_ok=True)
 

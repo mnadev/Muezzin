@@ -15,7 +15,14 @@ from screens import MuezzinCarousel
 _, _, _, enable_dark_mode = read_from_config()
 
 class MuezzinApp(MDApp):
+  """
+  Main app for Muezzing
+  """
   def build(self):
+    """
+    Sets the icon and theme parameters of Kivy, and returns an instance of the MuezzinCarousel
+    :return: an instance of MuezzinCarousel
+    """
     self.icon = "res/mosque_new.png"
     self.theme_cls.primary_palette = "Green"
     self.theme_cls.primary_hue = "600"

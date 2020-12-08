@@ -24,6 +24,12 @@ fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode = read_from_config()
 
 
 def update_fajr_alarm(checkbox, value):
+  """
+  Updates the boolean that controls the fajr alarm, and updates the config file.
+  :param checkbox: The checkbox, given by Kivy
+  :param value: The value of the checkbox, given by Kivy
+  :return:  None
+  """
   global fajr_alarm
   global tahajjud_alarm
   global is_fahrenheit
@@ -43,6 +49,12 @@ if enable_dark_mode:
 
 
 def update_tahajjud_alarm(checkbox, value):
+  """
+  Updates the boolean that controls the tahajjud alarm, and updates the config file.
+  :param checkbox: The checkbox, given by Kivy
+  :param value: The value of the checkbox, given by Kivy
+  :return:  None
+  """
   global fajr_alarm
   global tahajjud_alarm
   global is_fahrenheit
@@ -54,6 +66,12 @@ def update_tahajjud_alarm(checkbox, value):
 
 
 def update_fahrenheit_boolean(checkbox, value):
+  """
+  Updates the boolean that controls fahrenheit/celcius, and updates the config file.
+  :param checkbox: The checkbox, given by Kivy
+  :param value: The value of the checkbox, given by Kivy
+  :return:  None
+  """
   global fajr_alarm
   global tahajjud_alarm
   global is_fahrenheit
@@ -65,6 +83,12 @@ def update_fahrenheit_boolean(checkbox, value):
 
 
 def update_enable_dark_mode(checkbox, value):
+  """
+  Updates the boolean that controls dark mode, updates the config file, and opens popup to exit app.
+  :param checkbox: The checkbox, given by Kivy
+  :param value: The value of the checkbox, given by Kivy
+  :return:  None
+  """
   global fajr_alarm
   global tahajjud_alarm
   global is_fahrenheit
@@ -84,10 +108,20 @@ def update_enable_dark_mode(checkbox, value):
 
 
 def close_app(*args):
+  """
+  Stops app
+  :param args: Args given by Kivy
+  :return: None
+  """
   MDApp.get_running_app().stop()
 
 
 def update_keep_playing_alarm(value):
+  """
+  Controls whether or not to continue playing the alarm
+  :param value: A boolean to control whether or not to continue playing the alarm
+  :return: None
+  """
   global keep_playing_alarm
 
   keep_playing_alarm = value
@@ -97,6 +131,11 @@ def update_keep_playing_alarm(value):
 
 
 def celcius_to_fahrenheit(celsius):
+  """
+  Converts a temperature from celcius to fahrenheit
+  :param celsius: The temperature in Celcius
+  :return: The converted fahrenheit temperature
+  """
   return round((celsius * 9 / 5) + 32, 2)
 
 
@@ -108,13 +147,25 @@ alarm.seek(0)
 
 
 def get_tomorrow_date():
+  """
+  Creates and returns a datetime object representing tomorrow at midnight
+  :return: A datetime object representing tomorrow at midnight
+  """
   today = datetime.datetime.today()
   today = today.replace(hour=0, minute=0, second=0, microsecond=0)
   return today + datetime.timedelta(days=1)
 
 
 class MuezzinCarousel(Carousel):
+  """
+  Defines a Carousel that swipes left/right and holds an InformationScreen, MainScreen and SettingsScreen.
+  """
+
   def __init__(self, **kwargs):
+    """
+    Creates a MuezzinCarousel.
+    :param kwargs: Kwargs for MDGridLayout
+    """
     super(MuezzinCarousel, self).__init__(**kwargs)
     self.information_screen = InformationScreen()
     self.main_screen = MainScreen()
@@ -126,6 +177,11 @@ class MuezzinCarousel(Carousel):
     self.index = 1
 
   def on_index(self, *args):
+    """
+    Updates different widgets when the Carousel index changes to the corresponding respective widget
+    :param args: Args given by kivy
+    :return: None
+    """
     if self.index == 1:
       self.main_screen.prayer_pane.update()
     if self.index == 0:
@@ -134,7 +190,15 @@ class MuezzinCarousel(Carousel):
 
 
 class InformationScreen(MDGridLayout):
+  """
+  Defines a wrapper widget which holds a moon widget, and weather widget along with some display text
+  """
+
   def __init__(self, **kwargs):
+    """
+    Creates a InformationScreen.
+    :param kwargs: Kwargs for MDGridLayout
+    """
     super(InformationScreen, self).__init__(**kwargs)
     self.cols = 1
     self.rows = 4
@@ -149,12 +213,25 @@ class InformationScreen(MDGridLayout):
     self.add_widget(self.weather_widget)
 
   def update(self):
+    """
+    Updates MoonWidget and WeatherWidget
+    :return: None
+    """
     self.moon_widget.update()
     self.weather_widget.update()
 
 
 class WeatherWidget(MDGridLayout):
+  """
+  Defines a Widget which displays the current weather condition, current temp, high temp, low temp and
+  corresponding image of current weather.
+  """
+
   def __init__(self, **kwargs):
+    """
+    Creates a WeatherWidgetLayout.
+    :param kwargs: Kwargs for MDGridLayout
+    """
     super(WeatherWidget, self).__init__(**kwargs)
     self.cols = 2
     self.rows = 3
@@ -202,20 +279,38 @@ class WeatherWidget(MDGridLayout):
     self.last_update_time = datetime.datetime.now()
 
   def update_weather_image(self, weather_state_abbr):
+    """
+    Obtain image of a weather state given the abbreviation code for the weather state
+    :param weather_state_abbr: The abbreviation code for the weather state
+    :return: Image of current weather condition, in bytes
+    """
     future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_weather_image, weather_state_abbr)
     image = future.result()
     return image
 
   def update_weather_location_woeid(self):
+    """
+    Updates woeid, which is the location ID for getting weather from the metaweather API.
+    :return: None
+    """
     future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_weather_location_woeid)
     self.woeid = future.result()
 
   def update_weather(self):
+    """
+    Calls API to get weather results from
+    :return: Results from weather API call
+    """
     future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_weather, self.woeid)
     weather = future.result()
     return weather
 
   def update(self, *args):
+    """
+    Updates text for current weather condition, current temp, high temp, low temp and the weather picture.
+    :param args: Args given by Kivy
+    :return: None
+    """
     if (datetime.datetime.now() - self.last_update_time).total_seconds() >= 1800:
       self.update_weather_location_woeid()
       self.weather = self.update_weather()
@@ -236,7 +331,15 @@ class WeatherWidget(MDGridLayout):
 
 
 class MoonWidget(MDGridLayout):
+  """
+  A widget that displays the current moon phase along with a picture. Updates moon phase daily.
+  """
+
   def __init__(self, **kwargs):
+    """
+    Creates a MoonWidget object
+    :param kwargs: Kwargs for MDGridLayout
+    """
     super(MoonWidget, self).__init__(**kwargs)
     self.cols = 1
     self.rows = 2
@@ -253,11 +356,20 @@ class MoonWidget(MDGridLayout):
     Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60)
 
   def update_moon_phase(self):
+    """
+    Calls API to get current moon phase
+    :return: Results of API call to get current moon phase
+    """
     future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_moon_phase)
     moon_phase = future.result()
     return moon_phase
 
   def update(self, *args):
+    """
+    Updates moon phase text and moon phase image and schedules daily updates.
+    :param args: Args given by Kivy
+    :return: None
+    """
     moon_phase = self.update_moon_phase()
     self.moon_text.text = moon_phase["phase"][moon_phase["firstDayMonth"]]["npWidget"]
     self.image.source = self.get_moon_pic(moon_phase["phase"][arrow.now().strftime("%-d")]["npWidget"])
@@ -265,6 +377,11 @@ class MoonWidget(MDGridLayout):
     Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60)
 
   def get_moon_pic(self, moon_phase_text):
+    """
+    Returns a file path to a picture of a moon phase given a text describing the current moon phase
+    :param moon_phase_text: The text describing the current moon phase
+    :return: the file path to the current moon phase picture
+    """
     # Images courtesy of freepik/flaticon
     if moon_phase_text.lower() == "full moon":
       return "res/full_moon.png"
@@ -290,7 +407,15 @@ class MoonWidget(MDGridLayout):
 
 
 class MainScreen(MDGridLayout):
+  """
+  Root widget for the main screen which shows the clock time, hijri and gregorian dates and prayer times.
+  """
+
   def __init__(self, **kwargs):
+    """
+    Create a MainScreen object
+    :param kwargs: Kwargs for MDGridLayout
+    """
     super(MainScreen, self).__init__(**kwargs)
     self.cols = 2
 
@@ -301,7 +426,15 @@ class MainScreen(MDGridLayout):
 
 
 class TimePane(MDGridLayout):
+  """
+  Displays and updates the current clock time
+  """
+
   def __init__(self, **kwargs):
+    """
+    Create a TimePane object
+    :param kwargs: Kwargs for MDGridLayout
+    """
     super(TimePane, self).__init__(**kwargs)
     self.cols = 1
     self.rows = 2
@@ -315,12 +448,26 @@ class TimePane(MDGridLayout):
     Clock.schedule_once(self.update, 60 - datetime.datetime.now().second % 60)
 
   def update(self, *args):
+    """
+    Schedules the clock time to update every minute
+    :param args: Args given by Kivy
+    :return: None
+    """
     self.time_widget.text = datetime.datetime.now().strftime("%I:%M %p")
     Clock.schedule_once(self.update, 60 - datetime.datetime.now().second % 60)
 
 
 class CalendarBox(MDGridLayout):
+  """
+  Holds Labels for displaying hijri and gregorian date, and
+  holds logic for updating these dates, at their respective times of change.
+  """
+
   def __init__(self, **kwargs):
+    """
+    Create a CalendarBox object
+    :param kwargs: Kwargs for MDGridLayout
+    """
     super(CalendarBox, self).__init__(**kwargs)
     self.cols = 3
     self.rows = 1
@@ -343,12 +490,22 @@ class CalendarBox(MDGridLayout):
     Clock.schedule_once(self.update_gregorian, (get_tomorrow_date() - datetime.datetime.now()).seconds)
 
   def update_gregorian(self, *args):
+    """
+    Schedules a Clock schedule to update Gregorian date at midnight.
+    :param args: Args given by Kivy
+    :return: None
+    """
     gregorian_date = getter.get_gregorian_date()
     self.gregorian_widget.text = gregorian_date["formatted_string"]
 
     Clock.schedule_once(self.update_gregorian, (self.get_tomorrow_date() - datetime.datetime.now()).seconds)
 
   def update_hijri(self, *args):
+    """
+    Schedules a Clock schedule to update Hijri date at maghrib time.
+    :param args: Args given by Kivy
+    :return: None
+    """
     is_after_maghrib = self.check_before_after_maghrib()
     self.update_hijri_date(is_after_maghrib)
     if is_after_maghrib:
@@ -360,6 +517,13 @@ class CalendarBox(MDGridLayout):
               self.get_time_of_prayer(self.get_prayer_times()["Maghrib"]) - datetime.datetime.now()).seconds)
 
   def get_time_of_prayer(self, time_string, shift_tomorrow=False):
+    """
+    Takes a clock time string and returns a datetime object of today with that time string
+    :param time_string: A string of format "xx:xx pm/am" showing a certain clock time
+    :param shift_tomorrow: A boolean that states whether to shift to the next Islamic day, if it's after maghrib
+    :return: A datetime object with today's date, and the clock time corresponding to the time string
+    """
+
     adhan_time = datetime.datetime.strptime(time_string, "%I:%M %p")
     today = datetime.datetime.today()
     today = today.replace(hour=adhan_time.hour, minute=adhan_time.minute, second=0, microsecond=0)
@@ -368,26 +532,52 @@ class CalendarBox(MDGridLayout):
     return today
 
   def update_hijri_date(self, is_tomorrow):
+    """
+    Updates the hijri date label
+    :param is_tomorrow: A boolean that states whether it's after maghrib, i.e. is it the next Islamic day
+    :return: None
+    """
     future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_hijri_date, is_tomorrow)
     hijri_date = future.result()
     self.hijri_widget.text = str(hijri_date['day']) + " " + hijri_date['month'] + " " + str(hijri_date['year']) + " AH"
 
   def check_before_after_maghrib(self):
+    """
+    Checks whether current time is before or after maghrib
+    :return: A boolean stating whether current time is before or after maghrib
+    """
     current_time = datetime.datetime.now()
     maghrib_today = self.get_time_of_prayer(self.get_prayer_times()["Maghrib"])
     return current_time > maghrib_today
 
   def get_prayer_times(self):
+    """
+    Obtains today's prayer times from API
+    :return: Returns today's prayer times in dict format
+    """
     todays_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_today)
     return todays_times_future.result()
 
   def get_prayer_times_tomorrow(self):
+    """
+    Obtains tomorrow's prayer times from API
+    :return: Returns tomorrow's prayer times in dict format
+    """
     tomorrow_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_tomorrow)
     return tomorrow_times_future.result()
 
 
 class PrayerPane(MDGridLayout):
+  """
+  Defines the pane holding the children PrayerTimeLayout widgets. Also defines logic for updating prayer times,
+  and for scheduling a tahajjud alarm.
+  """
+
   def __init__(self, **kwargs):
+    """
+    Create a PrayerPane object
+    :param kwargs: Kwargs for MDGridLayout
+    """
     super(PrayerPane, self).__init__(**kwargs)
     self.cols = 1
     self.rows = 6
@@ -407,12 +597,21 @@ class PrayerPane(MDGridLayout):
     self.alarm_popup_service = AlarmDismissPopup()
 
   def get_prayer_times(self):
+    """
+    Updates today's and tomorrow's prayer times
+    :return: None
+    """
     todays_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_today)
     self.todays_times = todays_times_future.result()
     tomorrow_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_tomorrow)
     self.tomorrow_times = tomorrow_times_future.result()
 
   def update(self, *args):
+    """
+    Updates all child PrayerTimeLayout widgets and schedules tahajjud alarm if applicable.
+    :param args: Args given by Kivy
+    :return: None
+    """
     for prayer_time in ["Fajr", "Duha", "Dhuhr", "Asr", "Maghrib", "Isha"]:
       self.prayer_time_widgets[prayer_time].update(self.todays_times, self.tomorrow_times)
     Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds)
@@ -420,6 +619,10 @@ class PrayerPane(MDGridLayout):
       self.schedule_alarm_tahajjud()
 
   def schedule_alarm_tahajjud(self):
+    """
+    Schedules alarm for the last third of night (for tahajjud).
+    :return: None
+    """
     tomorrows_fajr = self.get_time_of_prayer(self.tomorrow_times["Fajr"]) + datetime.timedelta(days=1)
     todays_isha = self.get_time_of_prayer(self.todays_times["Isha"])
 
@@ -430,17 +633,32 @@ class PrayerPane(MDGridLayout):
     Clock.schedule_once(self.reset_alarm, (time_of_alarm - datetime.datetime.now()).total_seconds() + 17)
 
   def get_time_of_prayer(self, time_string):
+    """
+    Takes a clock time string and returns a datetime object of today with that time string
+    :param time_string: A string of format "xx:xx pm/am" showing a certain clock time
+    :return: A datetime object with today's date, and the clock time corresponding to the time string
+    """
     adhan_time = datetime.datetime.strptime(time_string, "%I:%M %p")
     today = datetime.datetime.today()
     today = today.replace(hour=adhan_time.hour, minute=adhan_time.minute, second=0, microsecond=0)
     return today
 
   def play_alarm(self, *args):
+    """
+    Plays alarm sound, and displays alarm popup
+    :param args: Args given by Kivy
+    :return: None
+    """
     if not self.alarm_popup_service.is_open:
       self.alarm_popup_service.open()
     alarm.play()
 
   def reset_alarm(self, *args):
+    """
+    Resets alarm sound to the 0th time, and reschedules alarm if it's not dismissed yet.
+    :param args: Args given by Kivy
+    :return: None
+    """
     alarm.seek(0)
     global keep_playing_alarm
 
@@ -452,7 +670,19 @@ class PrayerPane(MDGridLayout):
 
 
 class PrayerTimeLayout(MDGridLayout):
+  """
+  Holds the UI logic, updating prayer time logic, adhan scheduling logic,
+  and alarm scheduling logic (for Fajr) for a specific prayer time.
+  """
+
   def __init__(self, prayer_time, todays_times, tomorrow_times, **kwargs):
+    """
+    Creates a PrayerTimeLayout object
+    :param prayer_time: The prayer time as a string corresponding to this object
+    :param todays_times: Today's prayer times in dict format
+    :param tomorrow_times: Tomorrow's prayer times in dict format
+    :param kwargs: Kwargs for MDGridLayout
+    """
     super(PrayerTimeLayout, self).__init__(**kwargs)
     self.cols = 1
     self.rows = 2
@@ -472,6 +702,10 @@ class PrayerTimeLayout(MDGridLayout):
     self.alarm_popup_service = AlarmDismissPopup()
 
   def schedule_adhan(self):
+    """
+    Schedules adhan to play at the specific prayer time
+    :return: None
+    """
     time_of_prayer = self.get_time_of_prayer(self.todays_times[self.prayer_time])
     if time_of_prayer < datetime.datetime.now():
       time_of_prayer = self.get_time_of_prayer(self.tomorrow_times[self.prayer_time]) + datetime.timedelta(days=1)
@@ -482,6 +716,10 @@ class PrayerTimeLayout(MDGridLayout):
       self.schedule_alarm_before_prayer()
 
   def schedule_alarm_before_prayer(self):
+    """
+    Schedules alarm 10 minutes before Fajr time
+    :return: None
+    """
     time_of_prayer = self.get_time_of_prayer(self.todays_times[self.prayer_time])
     if time_of_prayer < datetime.datetime.now():
       time_of_prayer = self.get_time_of_prayer(self.tomorrow_times[self.prayer_time]) + datetime.timedelta(days=1)
@@ -489,14 +727,29 @@ class PrayerTimeLayout(MDGridLayout):
     Clock.schedule_once(self.reset_alarm, (time_of_prayer - datetime.datetime.now()).total_seconds() - 600 + 17)
 
   def play_alarm(self, *args):
+    """
+    Plays alarm sound, and displays alarm popup
+    :param args: Args given by Kivy
+    :return: None
+    """
     alarm.play()
     if not self.alarm_popup_service.is_open:
       self.alarm_popup_service.open()
 
   def play_adhan(self, *args):
+    """
+    Plays adhan sound
+    :param args: Args given by Kivy
+    :return: None
+    """
     adhan.play()
 
   def reset_alarm(self, *args):
+    """
+    Resets alarm sound to the 0th time, and reschedules alarm if it's not dismissed yet.
+    :param args: Args given by Kivy
+    :return: None
+    """
     alarm.seek(0)
     global keep_playing_alarm
 
@@ -507,15 +760,31 @@ class PrayerTimeLayout(MDGridLayout):
       keep_playing_alarm = True
 
   def reset_adhan(self, *args):
+    """
+    Resets adhan sound to the 0th time
+    :param args: Args given by Kivy
+    :return: None
+    """
     adhan.seek(0)
 
   def get_time_of_prayer(self, time_string):
+    """
+    Takes a clock time string and returns a datetime object of today with that time string
+    :param time_string: A string of format "xx:xx pm/am" showing a certain clock time
+    :return: A datetime object with today's date, and the clock time corresponding to the time string
+    """
     adhan_time = datetime.datetime.strptime(time_string, "%I:%M %p")
     today = datetime.datetime.today()
     today = today.replace(hour=adhan_time.hour, minute=adhan_time.minute, second=0, microsecond=0)
     return today
 
   def update(self, todays_times, tomorrow_times):
+    """
+    Updates the Labels and updates the adhan schedule with newly updated times.
+    :param todays_times: Today's prayer times in dict format
+    :param tomorrow_times: Tomorrow's prayer times in dict format
+    :return: None
+    """
     self.todays_times = todays_times
     self.tomorrow_times = tomorrow_times
     self.todays_time_widget.text = self.prayer_time + ": " + todays_times[self.prayer_time]
@@ -524,8 +793,16 @@ class PrayerTimeLayout(MDGridLayout):
 
 
 class WrappedLabel(Label):
+  """
+  A subclass of Label which supports wrapping text automatically.
+  """
+
   # Courtesy of https://stackoverflow.com/questions/43666381/wrapping-the-text-of-a-kivy-label
   def __init__(self, **kwargs):
+    """
+    Creates a WrappedLabel object
+    :param kwargs: Arguments for Label
+    """
     super().__init__(**kwargs)
     self.bind(
       width=lambda *x:
@@ -534,7 +811,15 @@ class WrappedLabel(Label):
 
 
 class SettingsScreen(MDGridLayout):
+  """
+  Holds the different setting objects
+  """
+
   def __init__(self, **kwargs):
+    """
+    Creates a SettingsScreen object
+    :param kwargs: Arguments for MDGridLayout
+    """
     super(SettingsScreen, self).__init__(**kwargs)
     self.cols = 1
     self.rows = 5
@@ -549,7 +834,15 @@ class SettingsScreen(MDGridLayout):
 
 
 class FajrAlarmSetting(AnchorLayout):
+  """
+  Holds a Label and MDSwitch which controls whether or not a Fajr Alarm is on
+  """
+
   def __init__(self, **kwargs):
+    """
+    Creates a FajrAlarmSetting object
+    :param kwargs: Arguments for Anchor Layout
+    """
     super(FajrAlarmSetting, self).__init__(**kwargs)
 
     self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
@@ -567,7 +860,15 @@ class FajrAlarmSetting(AnchorLayout):
 
 
 class TahajjudAlarmSetting(AnchorLayout):
+  """
+  Holds a Label and MDSwitch which controls whether or not a Tahajjud Alarm is on
+  """
+
   def __init__(self, **kwargs):
+    """
+    Creates a TahajjudAlarmSetting object
+    :param kwargs: Arguments for Anchor Layout
+    """
     super(TahajjudAlarmSetting, self).__init__(**kwargs)
 
     self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
@@ -585,7 +886,15 @@ class TahajjudAlarmSetting(AnchorLayout):
 
 
 class TemperatureUnitSetting(AnchorLayout):
+  """
+  Holds a Label and MDSwitch which controls whether or not we use fahrenheit/celcius.
+  """
+
   def __init__(self, **kwargs):
+    """
+    Creates a TemperatureUnitSetting object
+    :param kwargs: Arguments for Anchor Layout
+    """
     super(TemperatureUnitSetting, self).__init__(**kwargs)
     self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
     self.text_anchor_layout.add_widget(
@@ -603,7 +912,15 @@ class TemperatureUnitSetting(AnchorLayout):
 
 
 class EnableDarkModeSetting(AnchorLayout):
+  """
+  Holds a Label and MDSwitch which controls whether or not dark mode is on.
+  """
+
   def __init__(self, **kwargs):
+    """
+    Creates an EnableDarkModeSetting object
+    :param kwargs: Arguments for Anchor Layout
+    """
     super(EnableDarkModeSetting, self).__init__(**kwargs)
     self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
     self.text_anchor_layout.add_widget(
@@ -620,7 +937,14 @@ class EnableDarkModeSetting(AnchorLayout):
 
 
 class AlarmDismissPopup:
+  """
+  Creates a MDDialog to dismiss the alarm and holds logic to show dialog, dismiss dialog and shut off alarm.
+  """
+
   def __init__(self):
+    """
+    Creates an AlarmDismissPopup
+    """
     self.popup_layout = MDGridLayout(cols=1, padding=10)
 
     self.dismiss_button = MDRaisedButton(text="Dismiss")
@@ -633,10 +957,19 @@ class AlarmDismissPopup:
     self.is_open = False
 
   def dismiss(self, *args):
+    """
+    Dismisses the alarm popup and silences the alarm.
+    :param args: Args sent by Kivy
+    :return: None
+    """
     self.alarm_popup.dismiss()
     update_keep_playing_alarm(False)
     self.is_open = False
 
   def open(self):
+    """
+    Opens the alarm dismissal popup
+    :return: None
+    """
     self.alarm_popup.open()
     self.is_open = True
