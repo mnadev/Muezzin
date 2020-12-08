@@ -346,10 +346,9 @@ class MoonWidget(MDGridLayout):
     moon_phase = self.update_moon_phase()
     self.size_hint = (0.8, 0.8)
     self.orientation = "horizontal"
-    self.moon_text = Label(text=moon_phase["phase"][arrow.now().strftime("%-d")]["npWidget"],
-                           color=default_text_color, font_name="RobotoMono-Regular", size_hint=(1, 1),
+    self.moon_text = Label(text=moon_phase, color=default_text_color, font_name="RobotoMono-Regular", size_hint=(1, 1),
                            font_size="15sp")
-    self.image = Image(source=self.get_moon_pic(moon_phase["phase"][arrow.now().strftime("%-d")]["npWidget"]))
+    self.image = Image(source=self.get_moon_pic(moon_phase))
 
     self.add_widget(self.moon_text)
     self.add_widget(self.image)
@@ -360,9 +359,7 @@ class MoonWidget(MDGridLayout):
     Calls API to get current moon phase
     :return: Results of API call to get current moon phase
     """
-    future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_moon_phase)
-    moon_phase = future.result()
-    return moon_phase
+    return getter.get_moon_phase()
 
   def update(self, *args):
     """
@@ -371,8 +368,8 @@ class MoonWidget(MDGridLayout):
     :return: None
     """
     moon_phase = self.update_moon_phase()
-    self.moon_text.text = moon_phase["phase"][moon_phase["firstDayMonth"]]["npWidget"]
-    self.image.source = self.get_moon_pic(moon_phase["phase"][arrow.now().strftime("%-d")]["npWidget"])
+    self.moon_text.text = moon_phase
+    self.image.source = self.get_moon_pic(moon_phase)
 
     Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60)
 
@@ -382,6 +379,7 @@ class MoonWidget(MDGridLayout):
     :param moon_phase_text: The text describing the current moon phase
     :return: the file path to the current moon phase picture
     """
+
     # Images courtesy of freepik/flaticon
     if moon_phase_text.lower() == "full moon":
       return "res/full_moon.png"
@@ -391,19 +389,16 @@ class MoonWidget(MDGridLayout):
       return "res/first_quarter.png"
     elif moon_phase_text.lower() == "last quarter":
       return "res/third_quarter.png"
+    elif moon_phase_text.lower() == "new moon":
+      return "res/new_moon.png"
+    elif moon_phase_text.lower() == "waxing gibbous":
+      return "res/waxing_gibbous.png"
+    elif moon_phase_text.lower() == "waning gibbous":
+      return "res/waning_gibbous.png"
+    elif moon_phase_text.lower() == "waxing crescent":
+      return "res/waxing_crescent.png"
     else:
-      split_moon_phase = re.compile("\((.*)\)").split(moon_phase_text)
-      percentage = split_moon_phase[1][:-1]
-      if "Waning" in moon_phase_text:
-        if int(percentage) < 50:
-          return "res/waning_crescent.png"
-        else:
-          return "res/waning_gibbous.png"
-      else:
-        if int(percentage) < 50:
-          return "res/waxing_crescent.png"
-        else:
-          return "res/waxing_gibbous.png"
+      return "res/waning_crescent.png"
 
 
 class MainScreen(MDGridLayout):

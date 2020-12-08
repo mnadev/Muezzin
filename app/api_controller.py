@@ -1,6 +1,7 @@
 import arrow
 import constants
 from io import BytesIO
+from moon_phase_calculator import phase, position
 import re
 import requests
 
@@ -166,18 +167,7 @@ def get_weather(woeid):
 
 def get_moon_phase():
   """
-  Make request for today's moon phase to Moon Phase API and obtain response
-  :return: The response from the Moon Phase API
+  Calculate today's moon phase
+  :return: The current moon phase
   """
-  time = arrow.now()
-  params = {
-    "lang": "en",
-    "month": time.strftime("%m"),
-    "year": time.strftime("%Y"),
-    "size": 100,
-    "lightColor": "rgb(245, 245, 245)",
-    "shadeColor": "rgb(17, 17, 17)",
-    "LDZ": time.time()
-  }
-  moon_phase_request = requests.get(constants.MOON_API_URL, params=params)
-  return moon_phase_request.json()
+  return phase(position())
