@@ -60,9 +60,10 @@ def get_location():
   return location_response.json()
 
 
-def _get_prayer_times(country, zipcode, latitude, longitude, time_zone, time=arrow.now()):
+def _get_prayer_times(juristic_method, country, zipcode, latitude, longitude, time_zone, time=arrow.now()):
   """
   Gets prayer times for the defined parameters, including the defined time
+  :param juristic_method: The juristic method to calculate asr times (0 shafi/hanbali/maliki, 1 for hanafi)
   :param country: The country where you want prayer times
   :param zipcode: The zipcode where you want prayer times
   :param latitude: The latitude where you want prayer times
@@ -91,7 +92,8 @@ def _get_prayer_times(country, zipcode, latitude, longitude, time_zone, time=arr
     "time_zone": time_zone,
     "zipcode": zipcode,
     "country": country,
-    "date": time.strftime("%Y-%m-%d")
+    "date": time.strftime("%Y-%m-%d"),
+    "juristic": juristic_method
   }
 
   prayer_times_response = requests.get(constants.PRAYER_TIMES_URL, params=params)
@@ -104,9 +106,11 @@ def _get_prayer_times(country, zipcode, latitude, longitude, time_zone, time=arr
   return results
 
 
-def get_prayer_times_today(country=None, zipcode=None, latitude=None, longitude=None, time_zone=None):
+def get_prayer_times_today(juristic_method=0, country=None, zipcode=None, latitude=None, longitude=None,
+                           time_zone=None):
   """
   Gets prayer times for today for the given parameters.
+  :param juristic_method: The juristic method to calculate asr times (0 shafi/hanbali/maliki, 1 for hanafi)
   :param country: The country where you want prayer times
   :param zipcode: The zipcode where you want prayer times
   :param latitude: The latitude where you want prayer times
@@ -114,13 +118,15 @@ def get_prayer_times_today(country=None, zipcode=None, latitude=None, longitude=
   :param time_zone: The time zone where you want prayer times
   :return: Today's prayer times in dict format
   """
-  return _get_prayer_times(country=country, zipcode=zipcode, latitude=latitude, longitude=longitude,
+  return _get_prayer_times(juristic_method, country=country, zipcode=zipcode, latitude=latitude, longitude=longitude,
                            time_zone=time_zone)
 
 
-def get_prayer_times_tomorrow(country=None, zipcode=None, latitude=None, longitude=None, time_zone=None):
+def get_prayer_times_tomorrow(juristic_method=0, country=None, zipcode=None, latitude=None, longitude=None,
+                              time_zone=None):
   """
   Gets prayer times for tomorrow for the given parameters.
+  :param juristic_method: The juristic method to calculate asr times (0 shafi/hanbali/maliki, 1 for hanafi)
   :param country: The country where you want prayer times
   :param zipcode: The zipcode where you want prayer times
   :param latitude: The latitude where you want prayer times
@@ -128,7 +134,7 @@ def get_prayer_times_tomorrow(country=None, zipcode=None, latitude=None, longitu
   :param time_zone: The time zone where you want prayer times
   :return: Tomorrow's prayer times in dict format
   """
-  return _get_prayer_times(country=country, zipcode=zipcode, latitude=latitude, longitude=longitude,
+  return _get_prayer_times(juristic_method, country=country, zipcode=zipcode, latitude=latitude, longitude=longitude,
                            time_zone=time_zone, time=arrow.now().shift(days=1))
 
 

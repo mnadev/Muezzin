@@ -12,15 +12,13 @@ from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.selectioncontrol import MDSwitch
 
 import api_controller as getter
-import arrow
 import concurrent.futures
 from config_handler import read_from_config, write_to_config
 import datetime
-import re
 
 keep_playing_alarm = True
 
-fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode = read_from_config()
+fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode, use_hanafi_method = read_from_config()
 
 
 def update_fajr_alarm(checkbox, value):
@@ -34,10 +32,11 @@ def update_fajr_alarm(checkbox, value):
   global tahajjud_alarm
   global is_fahrenheit
   global enable_dark_mode
+  global use_hanafi_method
 
   fajr_alarm = value
 
-  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode)
+  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode, use_hanafi_method)
 
 
 default_text_color = [0.65, 0.81, 0.17, 1]
@@ -59,10 +58,11 @@ def update_tahajjud_alarm(checkbox, value):
   global tahajjud_alarm
   global is_fahrenheit
   global enable_dark_mode
+  global use_hanafi_method
 
   tahajjud_alarm = value
 
-  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode)
+  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode, use_hanafi_method)
 
 
 def update_fahrenheit_boolean(checkbox, value):
@@ -76,10 +76,29 @@ def update_fahrenheit_boolean(checkbox, value):
   global tahajjud_alarm
   global is_fahrenheit
   global enable_dark_mode
+  global use_hanafi_method
 
   is_fahrenheit = value
 
-  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode)
+  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode, use_hanafi_method)
+
+
+def update_asr_juristic_method(checkbox, value):
+  """
+  Updates the boolean that controls fahrenheit/celcius, and updates the config file.
+  :param checkbox: The checkbox, given by Kivy
+  :param value: The value of the checkbox, given by Kivy
+  :return:  None
+  """
+  global fajr_alarm
+  global tahajjud_alarm
+  global is_fahrenheit
+  global enable_dark_mode
+  global use_hanafi_method
+
+  use_hanafi_method = value
+
+  write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode, use_hanafi_method)
 
 
 def update_enable_dark_mode(checkbox, value):
@@ -93,10 +112,11 @@ def update_enable_dark_mode(checkbox, value):
   global tahajjud_alarm
   global is_fahrenheit
   global enable_dark_mode
+  global use_hanafi_method
 
   if value != enable_dark_mode:
     enable_dark_mode = value
-    write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode)
+    write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode, use_hanafi_method)
 
     exit_button = MDRaisedButton(text="Exit App")
     exit_button.bind(on_press=close_app)
@@ -550,7 +570,10 @@ class CalendarBox(MDGridLayout):
     Obtains today's prayer times from API
     :return: Returns today's prayer times in dict format
     """
-    todays_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_today)
+    juristic_method = 0
+    if use_hanafi_method:
+      juristic_method = 1
+    todays_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_today, juristic_method)
     return todays_times_future.result()
 
   def get_prayer_times_tomorrow(self):
@@ -558,7 +581,11 @@ class CalendarBox(MDGridLayout):
     Obtains tomorrow's prayer times from API
     :return: Returns tomorrow's prayer times in dict format
     """
-    tomorrow_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_tomorrow)
+    juristic_method = 0
+    if use_hanafi_method:
+      juristic_method = 1
+    tomorrow_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_tomorrow,
+                                                                           juristic_method)
     return tomorrow_times_future.result()
 
 
@@ -596,9 +623,13 @@ class PrayerPane(MDGridLayout):
     Updates today's and tomorrow's prayer times
     :return: None
     """
-    todays_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_today)
+    juristic_method = 0
+    if use_hanafi_method:
+      juristic_method = 1
+    todays_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_today, juristic_method)
     self.todays_times = todays_times_future.result()
-    tomorrow_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_tomorrow)
+    tomorrow_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_tomorrow,
+                                                                           juristic_method)
     self.tomorrow_times = tomorrow_times_future.result()
 
   def update(self, *args):
@@ -607,6 +638,7 @@ class PrayerPane(MDGridLayout):
     :param args: Args given by Kivy
     :return: None
     """
+    self.get_prayer_times()
     for prayer_time in ["Fajr", "Duha", "Dhuhr", "Asr", "Maghrib", "Isha"]:
       self.prayer_time_widgets[prayer_time].update(self.todays_times, self.tomorrow_times)
     Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds)
@@ -817,13 +849,14 @@ class SettingsScreen(MDGridLayout):
     """
     super(SettingsScreen, self).__init__(**kwargs)
     self.cols = 1
-    self.rows = 5
+    self.rows = 6
 
     self.add_widget(Label(text="Settings", color=default_text_color,
                           font_name="RobotoMono-Regular",
-                          size_hint=(1, 0.5), font_size="40sp"))
+                          size_hint=(1, 0.5), font_size="30sp"))
     self.add_widget(FajrAlarmSetting())
     self.add_widget(TahajjudAlarmSetting())
+    self.add_widget(AsrJuristicMethodSetting())
     self.add_widget(TemperatureUnitSetting())
     self.add_widget(EnableDarkModeSetting())
 
@@ -847,7 +880,7 @@ class FajrAlarmSetting(AnchorLayout):
 
     self.alarm_checkbox = MDSwitch(active=fajr_alarm)
     self.alarm_checkbox.bind(active=update_fajr_alarm)
-    self.alarm_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='center')
+    self.alarm_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='bottom')
     self.alarm_checkbox_anchor_layout.add_widget(self.alarm_checkbox)
 
     self.add_widget(self.text_anchor_layout)
@@ -873,7 +906,7 @@ class TahajjudAlarmSetting(AnchorLayout):
 
     self.alarm_checkbox = MDSwitch(active=tahajjud_alarm)
     self.alarm_checkbox.bind(active=update_tahajjud_alarm)
-    self.alarm_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='center')
+    self.alarm_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='bottom')
     self.alarm_checkbox_anchor_layout.add_widget(self.alarm_checkbox)
 
     self.add_widget(self.text_anchor_layout)
@@ -893,17 +926,43 @@ class TemperatureUnitSetting(AnchorLayout):
     super(TemperatureUnitSetting, self).__init__(**kwargs)
     self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
     self.text_anchor_layout.add_widget(
-      Label(text="Check for Fahrenheit (default: Celcius)", color=default_text_color,
+      Label(text="Display temp in Fahrenheit (default: Celcius)", color=default_text_color,
             font_name="RobotoMono-Regular",
             size_hint=(1, 0.5), font_size="10sp"))
 
     self.temp_checkbox = MDSwitch(active=is_fahrenheit)
     self.temp_checkbox.bind(active=update_fahrenheit_boolean)
-    self.temp_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='center')
+    self.temp_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='bottom')
     self.temp_checkbox_anchor_layout.add_widget(self.temp_checkbox)
 
     self.add_widget(self.text_anchor_layout)
     self.add_widget(self.temp_checkbox_anchor_layout)
+
+
+class AsrJuristicMethodSetting(AnchorLayout):
+  """
+  Holds a Label and MDSwitch which controls what juristic method is used to calculate Asr times.
+  """
+
+  def __init__(self, **kwargs):
+    """
+    Creates a AsrJuristicMethodSetting object
+    :param kwargs: Arguments for Anchor Layout
+    """
+    super(AsrJuristicMethodSetting, self).__init__(**kwargs)
+    self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
+    self.text_anchor_layout.add_widget(
+      Label(text="Use Hanaji juristic method for Asr", color=default_text_color,
+            font_name="RobotoMono-Regular",
+            size_hint=(1, 0.5), font_size="10sp"))
+
+    self.asr_juristic_checkbox = MDSwitch(active=use_hanafi_method)
+    self.asr_juristic_checkbox.bind(active=update_asr_juristic_method)
+    self.asr_juristic_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='bottom')
+    self.asr_juristic_checkbox_anchor_layout.add_widget(self.asr_juristic_checkbox)
+
+    self.add_widget(self.text_anchor_layout)
+    self.add_widget(self.asr_juristic_checkbox_anchor_layout)
 
 
 class EnableDarkModeSetting(AnchorLayout):
@@ -924,7 +983,7 @@ class EnableDarkModeSetting(AnchorLayout):
 
     self.dark_mode_checkbox = MDSwitch(active=enable_dark_mode)
     self.dark_mode_checkbox.bind(active=update_enable_dark_mode)
-    self.dark_mode_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='center')
+    self.dark_mode_checkbox_anchor_layout = AnchorLayout(anchor_x='center', anchor_y='bottom')
     self.dark_mode_checkbox_anchor_layout.add_widget(self.dark_mode_checkbox)
 
     self.add_widget(self.text_anchor_layout)

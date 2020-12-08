@@ -12,7 +12,7 @@ from kivymd.app import MDApp
 from config_handler import read_from_config
 from screens import MuezzinCarousel
 
-_, _, _, enable_dark_mode = read_from_config()
+_, _, _, enable_dark_mode, _ = read_from_config()
 
 class MuezzinApp(MDApp):
   """
