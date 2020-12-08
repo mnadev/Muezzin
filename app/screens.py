@@ -39,7 +39,7 @@ def update_fajr_alarm(checkbox, value):
   write_to_config(fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode, use_hanafi_method)
 
 
-default_text_color = [0.65, 0.81, 0.17, 1]
+default_text_color = [0.65, 0.7, 0.01, 1]
 default_clock_color = [0, 0, 0, 1]
 
 if enable_dark_mode:
