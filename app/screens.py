@@ -978,8 +978,8 @@ class EnableDarkModeSetting(AnchorLayout):
     super(EnableDarkModeSetting, self).__init__(**kwargs)
     self.text_anchor_layout = AnchorLayout(anchor_x='left', anchor_y='top')
     self.text_anchor_layout.add_widget(
-      Label(text="Enable Dark Mode", color=default_text_color, font_name="RobotoMono-Regular", size_hint=(1, 0.5),
-            font_size="10sp"))
+      Label(text="Enable Sith/Dark Mode (default: Jedi/light mode)", color=default_text_color,
+            font_name="RobotoMono-Regular", size_hint=(1, 0.5), font_size="10sp"))
 
     self.dark_mode_checkbox = MDSwitch(active=enable_dark_mode)
     self.dark_mode_checkbox.bind(active=update_enable_dark_mode)
