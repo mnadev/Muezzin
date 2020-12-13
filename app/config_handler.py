@@ -1,7 +1,13 @@
 from configparser import ConfigParser
 from pathlib import Path
+from sys import platform
 
-FILE_PATH = '~/muezzin/'
+FILE_PATH = ''
+if platform == "linux" or platform == "linux2" or platform == "darwin":
+  FILE_PATH = str(Path.home()) + '/muezzin/'
+elif platform == "win32":
+  FILE_PATH = '%PROGRAMDATA%\\muezzin\\config\\'
+
 FILE = FILE_PATH + 'muezzin_config.ini'
 
 Path(FILE_PATH).mkdir(parents=True, exist_ok=True)
