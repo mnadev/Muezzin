@@ -33,7 +33,8 @@ Refer to the instructions [here](https://kivy.org/doc/stable/gettingstarted/inst
 to install Kivy on your respective platform. 
 
 Make sure that Python 3 and pip is installed on your machine. Navigate to the root directory of your Muezzin app 
-(i.e. the directory this file is in)
+(i.e. the directory this file is in).
+
 Install the virtualenv library
 
 ```bash
@@ -62,4 +63,14 @@ Run the app
 
 ```bash
 python3 app/main.py
+```
+
+## Build Application
+### Mac OS X
+Follow instruction 1-5 on this [page](https://kivy.org/doc/stable/guide/packaging-osx.html).
+
+Next, run the build_mac.sh bash script to build the app and the DMG.
+
+```bash
+sh build_mac.sh
 ```
