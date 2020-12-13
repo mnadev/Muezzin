@@ -162,7 +162,7 @@ def celcius_to_fahrenheit(celsius):
 adhan = SoundLoader.load('res/adhan.mp3')
 adhan.seek(0)
 
-alarm = SoundLoader.load('res/alarm/alarm.mp3')
+alarm = SoundLoader.load('res/alarm.mp3')
 alarm.seek(0)
 
 
