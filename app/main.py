@@ -23,7 +23,7 @@ class MuezzinApp(MDApp):
     Sets the icon and theme parameters of Kivy, and returns an instance of the MuezzinCarousel
     :return: an instance of MuezzinCarousel
     """
-    self.icon = "res/mosque_new.png"
+    self.icon = "res/mosque_green.png"
     self.theme_cls.primary_palette = "Green"
     self.theme_cls.primary_hue = "600"
     if enable_dark_mode:
