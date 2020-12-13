@@ -26,3 +26,40 @@ The following features are present:
 * Choose between dark mode (Sith mode) and light mode (Jedi mode)
 
 ![Alt Text](demos/dark_mode_gif.gif)
+
+
+## Running the app
+Refer to the instructions [here](https://kivy.org/doc/stable/gettingstarted/installation.html)
+to install Kivy on your respective platform. 
+
+Make sure that Python 3 and pip is installed on your machine. Navigate to the root directory of your Muezzin app 
+(i.e. the directory this file is in)
+Install the virtualenv library
+
+```bash
+python3 -m pip install --upgrade pip setuptools virtualenv
+```
+
+Next, create a virtual environment
+
+```bash
+python3 -m virtualenv muezzin_env
+```
+
+Activate your virtual environment
+
+```bash
+source muezzin_env/bin/activate
+```
+
+Install all dependencies using pip
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the app
+
+```bash
+python3 app/main.py
+```
