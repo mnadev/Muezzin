@@ -375,7 +375,7 @@ class MoonWidget(MDGridLayout):
 
     self.add_widget(self.moon_text)
     self.add_widget(self.image)
-    Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60)
+    self.moon_schedule = Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60)
 
   def update_moon_phase(self):
     """
@@ -394,7 +394,8 @@ class MoonWidget(MDGridLayout):
     self.moon_text.text = moon_phase
     self.image.source = self.get_moon_pic(moon_phase)
 
-    Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60)
+    self.moon_schedule.cancel()
+    self.moon_schedule = Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60)
 
   def get_moon_pic(self, moon_phase_text):
     """
