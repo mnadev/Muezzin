@@ -1,3 +1,4 @@
+from __future__ import print_function
 from kivy.core.audio import SoundLoader
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.carousel import Carousel
@@ -438,6 +439,7 @@ class MainScreen(MDGridLayout):
 
     self.prayer_pane = PrayerPane(size_hint=(0.3, 1))
     self.add_widget(self.prayer_pane)
+    self.prayer_pane.update()
 
 
 class TimePane(MDGridLayout):
@@ -617,6 +619,8 @@ class PrayerPane(MDGridLayout):
 
     self.get_prayer_times()
     self.alarm_popup_service = AlarmDismissPopup()
+    self.alarm_schedule = None
+    self.alarm_reset_schedule = None
 
   def get_prayer_times(self):
     """
@@ -656,8 +660,14 @@ class PrayerPane(MDGridLayout):
     time_between_fajr_isha = (tomorrows_fajr - todays_isha).total_seconds()
     third_of_night = 2 / 3 * time_between_fajr_isha
     time_of_alarm = todays_isha + datetime.timedelta(seconds=third_of_night)
-    Clock.schedule_once(self.play_alarm, (time_of_alarm - datetime.datetime.now()).total_seconds())
-    Clock.schedule_once(self.reset_alarm, (time_of_alarm - datetime.datetime.now()).total_seconds() + 17)
+    if self.alarm_schedule is not None:
+      self.alarm_schedule.cancel()
+    if self.alarm_reset_schedule is not None:
+      self.alarm_reset_schedule.cancel()
+    self.alarm_schedule = Clock.schedule_once(self.play_alarm,
+                                              (time_of_alarm - datetime.datetime.now()).total_seconds())
+    self.alarm_reset_schedule = Clock.schedule_once(self.reset_alarm,
+                                                    (time_of_alarm - datetime.datetime.now()).total_seconds() + 17)
 
   def get_time_of_prayer(self, time_string):
     """
@@ -728,6 +738,11 @@ class PrayerTimeLayout(MDGridLayout):
     self.add_widget(self.tomorrows_time_widget)
     self.alarm_popup_service = AlarmDismissPopup()
 
+    self.adhan_schedule = None
+    self.adhan_reset_schedule = None
+    self.alarm_schedule = None
+    self.alarm_reset_schedule = None
+
   def schedule_adhan(self):
     """
     Schedules adhan to play at the specific prayer time
@@ -736,8 +751,15 @@ class PrayerTimeLayout(MDGridLayout):
     time_of_prayer = self.get_time_of_prayer(self.todays_times[self.prayer_time])
     if time_of_prayer < datetime.datetime.now():
       time_of_prayer = self.get_time_of_prayer(self.tomorrow_times[self.prayer_time]) + datetime.timedelta(days=1)
-    Clock.schedule_once(self.play_adhan, (time_of_prayer - datetime.datetime.now()).total_seconds())
-    Clock.schedule_once(self.reset_adhan, (time_of_prayer - datetime.datetime.now()).total_seconds() + 120)
+
+    if self.adhan_schedule is not None:
+      self.adhan_schedule.cancel()
+    if self.adhan_reset_schedule is not None:
+      self.adhan_reset_schedule.cancel()
+    self.adhan_schedule = Clock.schedule_once(self.play_adhan,
+                                              (time_of_prayer - datetime.datetime.now()).total_seconds())
+    self.adhan_reset_schedule = Clock.schedule_once(self.reset_adhan,
+                                                    (time_of_prayer - datetime.datetime.now()).total_seconds() + 120)
 
     if fajr_alarm and self.prayer_time == 'Fajr':
       self.schedule_alarm_before_prayer()
@@ -750,8 +772,15 @@ class PrayerTimeLayout(MDGridLayout):
     time_of_prayer = self.get_time_of_prayer(self.todays_times[self.prayer_time])
     if time_of_prayer < datetime.datetime.now():
       time_of_prayer = self.get_time_of_prayer(self.tomorrow_times[self.prayer_time]) + datetime.timedelta(days=1)
-    Clock.schedule_once(self.play_alarm, (time_of_prayer - datetime.datetime.now()).total_seconds() - 600)
-    Clock.schedule_once(self.reset_alarm, (time_of_prayer - datetime.datetime.now()).total_seconds() - 600 + 17)
+
+    if self.alarm_schedule is not None:
+      self.alarm_schedule.cancel()
+    if self.alarm_reset_schedule is not None:
+      self.alarm_reset_schedule.cancel()
+    self.alarm_schedule = Clock.schedule_once(self.play_alarm,
+                                              (time_of_prayer - datetime.datetime.now()).total_seconds() - 600)
+    self.alarm_reset_schedule = Clock.schedule_once(self.reset_alarm, (
+            time_of_prayer - datetime.datetime.now()).total_seconds() - 600 + 17)
 
   def play_alarm(self, *args):
     """
