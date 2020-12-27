@@ -1,4 +1,3 @@
-from __future__ import print_function
 from kivy.core.audio import SoundLoader
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.carousel import Carousel
@@ -162,6 +161,9 @@ def celcius_to_fahrenheit(celsius):
 
 adhan = SoundLoader.load('res/adhan.mp3')
 adhan.seek(0)
+
+fajr_adhan = SoundLoader.load('res/fajr_adhan.mp3')
+fajr_adhan.seek(0)
 
 alarm = SoundLoader.load('res/alarm.mp3')
 alarm.seek(0)
@@ -798,7 +800,10 @@ class PrayerTimeLayout(MDGridLayout):
     :param args: Args given by Kivy
     :return: None
     """
-    adhan.play()
+    if self.prayer_time == 'Fajr':
+      fajr_adhan.play()
+    else:
+      adhan.play()
 
   def reset_alarm(self, *args):
     """
@@ -821,7 +826,10 @@ class PrayerTimeLayout(MDGridLayout):
     :param args: Args given by Kivy
     :return: None
     """
-    adhan.seek(0)
+    if self.prayer_time == 'Fajr':
+      fajr_adhan.seek(0)
+    else:
+      adhan.seek(0)
 
   def get_time_of_prayer(self, time_string):
     """
