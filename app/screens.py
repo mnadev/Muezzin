@@ -6,7 +6,7 @@ from kivy.uix.image import CoreImage, Image
 from kivy.uix.label import Label
 
 from kivymd.app import MDApp
-from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.button import MDRaisedButton, MDRectangleFlatIconButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.selectioncontrol import MDSwitch
@@ -457,7 +457,7 @@ class TimePane(MDGridLayout):
     """
     super(TimePane, self).__init__(**kwargs)
     self.cols = 1
-    self.rows = 2
+    self.rows = 3
     self.time_widget = Label(text=datetime.datetime.now().strftime("%I:%M %p"), color=default_clock_color,
                              font_name="RobotoMono-Regular",
                              size_hint=(1, 0.5), font_size="50sp")
@@ -466,6 +466,13 @@ class TimePane(MDGridLayout):
     self.add_widget(self.time_widget)
 
     Clock.schedule_once(self.update, 60 - datetime.datetime.now().second % 60)
+
+    self.adhan_play_button = MDRectangleFlatIconButton(icon="play",
+                                                       text="Play adhan",
+                                                       text_color=default_clock_color)
+    self.adhan_play_button.bind(on_press=self.play_adhan)
+    self.add_widget(self.adhan_play_button)
+
 
   def update(self, *args):
     """
@@ -476,6 +483,22 @@ class TimePane(MDGridLayout):
     self.time_widget.text = datetime.datetime.now().strftime("%I:%M %p")
     Clock.schedule_once(self.update, 60 - datetime.datetime.now().second % 60)
 
+  def play_adhan(self, *args):
+    """
+    Plays adhan sound
+    :param args: Args given by Kivy
+    :return: None
+    """
+    Clock.schedule_once(self.reset_adhan, 120)
+    adhan.play()
+
+  def reset_adhan(self, *args):
+    """
+    Resets adhan sound to the 0th time
+    :param args: Args given by Kivy
+    :return: None
+    """
+    adhan.seek(0)
 
 class CalendarBox(MDGridLayout):
   """
