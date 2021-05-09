@@ -74,3 +74,33 @@ Next, run the build_mac.sh bash script to build the app and the DMG.
 ```bash
 sh build_mac.sh
 ```
+
+### Raspbian
+Install pyinstaller from source by running the following command:
+
+```
+git clone https://github.com/pyinstaller/pyinstaller
+cd pyinstaller
+python setup.py install
+```
+
+Then, build the bootloader from source in your pyinstaller directory as well:
+
+```
+cd bootloader
+python waf all
+```
+
+
+Next, run the build_pi.sh bash script to build the app and create a tar file. 
+
+```bash
+sudo sh build_pi.sh
+```
+
+If you want to start your app, navigate to the `muezzin_app` folder, and run `muezzin/muezzin`
+
+Run `sudo sh run_on_startup.sh` if you want to make the app run automatically on startup. This is really only useful you do not have display connected to the 
+Pi; otherwise you won't be able to see the app's GUI.
+
+Disclaimer: you need to set the environment variable `KIVY_AUDIO` to the value `sdl2` to get the audio to work on the Raspberry Pi.
