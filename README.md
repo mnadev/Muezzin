@@ -100,7 +100,7 @@ sudo sh build_pi.sh
 
 If you want to start your app, navigate to the `muezzin_app` folder, and run `muezzin/muezzin`
 
-Run `sudo sh run_on_startup.sh` if you want to make the app run automatically on startup. This is really only useful you do not have display connected to the 
-Pi; otherwise you won't be able to see the app's GUI.
+Run `sudo sh run_on_startup.sh` if you want to make the app run automatically on startup. This is really only useful you do not have a display connected to 
+the Pi; otherwise you won't be able to see the app's GUI.
 
 Disclaimer: you need to set the environment variable `KIVY_AUDIO` to the value `sdl2` to get the audio to work on the Raspberry Pi.
