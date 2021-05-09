@@ -3,11 +3,10 @@ from kivymd import hooks_path as kivymd_hooks_path
 
 block_cipher = None
 
-
 a = Analysis(['app/main.py'],
-             pathex=['/Users/mohammednadeem/Documents/Muezzin'],
+             pathex=[],
              binaries=[],
-             datas=[('/Users/mohammednadeem/Documents/Muezzin/app/res/*', './res/')],
+             datas=[('app/res/*', './res/')],
              hiddenimports=[],
              hookspath=[kivymd_hooks_path],
              runtime_hooks=[],
@@ -37,5 +36,5 @@ coll = COLLECT(exe,
                name='muezzin')
 app = BUNDLE(coll,
              name='muezzin.app',
-             icon='/Users/mohammednadeem/Documents/Muezzin/app/res/mosque_green.png',
+             icon='app/res/mosque_green.png',
              bundle_identifier=None)
