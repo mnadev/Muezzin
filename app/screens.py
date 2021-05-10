@@ -541,7 +541,7 @@ class CalendarBox(MDGridLayout):
     gregorian_date = getter.get_gregorian_date()
     self.gregorian_widget.text = gregorian_date["formatted_string"]
 
-    Clock.schedule_once(self.update_gregorian, (self.get_tomorrow_date() - datetime.datetime.now()).seconds)
+    Clock.schedule_once(self.update_gregorian, (get_tomorrow_date() - datetime.datetime.now()).seconds)
 
   def update_hijri(self, *args):
     """
