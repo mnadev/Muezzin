@@ -52,3 +52,7 @@ WEATHER_API_URL = "https://www.metaweather.com/api/location/"
 WEATHER_API_ICONS_BASE_URL = "https://www.metaweather.com/static/img/weather/png/64/"
 
 MOON_API_URL = "https://www.icalendar37.net/lunar/api/"
+
+CONFIG_THEME_SECTION = "THEME"
+CONFIG_ALARM_SECTION = "ALARM"
+CONFIG_MISC_SECTION = "MISC"
