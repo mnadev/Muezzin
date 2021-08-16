@@ -15,7 +15,7 @@ class MuezzinCarousel(Carousel):
         :param kwargs: Kwargs for MDGridLayout
         """
         super(MuezzinCarousel, self).__init__(**kwargs)
-        self.information_screen = InformationScreen()
+        self.information_screen = InformationScreen(config_handler)
         self.main_screen = MainScreen()
         self.settings_screen = SettingsScreen(config_handler)
 
