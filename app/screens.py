@@ -1,11 +1,9 @@
 from kivy.core.audio import SoundLoader
 from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.carousel import Carousel
 from kivy.clock import Clock
 from kivy.uix.image import CoreImage, Image
 from kivy.uix.label import Label
 
-from kivymd.app import MDApp
 from kivymd.uix.button import MDRectangleFlatIconButton
 from kivymd.uix.gridlayout import MDGridLayout
 
@@ -52,39 +50,6 @@ def get_tomorrow_date():
   today = datetime.datetime.today()
   today = today.replace(hour=0, minute=0, second=0, microsecond=0)
   return today + datetime.timedelta(days=1)
-
-
-class MuezzinCarousel(Carousel):
-  """
-  Defines a Carousel that swipes left/right and holds an InformationScreen, MainScreen and SettingsScreen.
-  """
-
-  def __init__(self, **kwargs):
-    """
-    Creates a MuezzinCarousel.
-    :param kwargs: Kwargs for MDGridLayout
-    """
-    super(MuezzinCarousel, self).__init__(**kwargs)
-    self.information_screen = InformationScreen()
-    self.main_screen = MainScreen()
-    self.settings_screen = SettingsScreen(config_handler)
-
-    self.add_widget(self.information_screen)
-    self.add_widget(self.main_screen)
-    self.add_widget(self.settings_screen)
-    self.index = 1
-
-  def on_index(self, *args):
-    """
-    Updates different widgets when the Carousel index changes to the corresponding respective widget
-    :param args: Args given by kivy
-    :return: None
-    """
-    if self.index == 1:
-      self.main_screen.prayer_pane.update()
-    if self.index == 0:
-      self.information_screen.update()
-    Carousel.on_index(self, *args)
 
 
 class InformationScreen(MDGridLayout):

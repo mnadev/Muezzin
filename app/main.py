@@ -11,7 +11,7 @@ from kivymd.app import MDApp
 
 from config_handler import ConfigHandler
 from constants import CONFIG_ENABLE_DARK_MODE_KEY
-from screens import MuezzinCarousel
+from muezzin_carousel import MuezzinCarousel
 
 config_handler = ConfigHandler()
 enable_dark_mode = config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
@@ -34,7 +34,7 @@ class MuezzinApp(MDApp):
             self.theme_cls.theme_style = "Dark"
         else:
             self.theme_cls.theme_style = "Light"
-        return MuezzinCarousel(direction="right")
+        return MuezzinCarousel(config_handler, direction="right")
 
 
 if __name__ == "__main__":
