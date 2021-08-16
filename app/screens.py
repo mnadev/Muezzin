@@ -11,12 +11,15 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.selectioncontrol import MDSwitch
 
+from alarm_popup import AlarmDismissPopup
 import api_controller as getter
+from audio_player import AudioPlayer
 import concurrent.futures
 from config_handler import read_from_config, write_to_config
 import datetime
 
-keep_playing_alarm = True
+
+audio_player = AudioPlayer()
 
 fajr_alarm, tahajjud_alarm, is_fahrenheit, enable_dark_mode, use_hanafi_method = read_from_config()
 
@@ -136,20 +139,6 @@ def close_app(*args):
   MDApp.get_running_app().stop()
 
 
-def update_keep_playing_alarm(value):
-  """
-  Controls whether or not to continue playing the alarm
-  :param value: A boolean to control whether or not to continue playing the alarm
-  :return: None
-  """
-  global keep_playing_alarm
-
-  keep_playing_alarm = value
-  if not value:
-    alarm.stop()
-    alarm.seek(0)
-
-
 def celcius_to_fahrenheit(celsius):
   """
   Converts a temperature from celcius to fahrenheit
@@ -164,9 +153,6 @@ adhan.seek(0)
 
 fajr_adhan = SoundLoader.load('res/fajr_adhan.mp3')
 fajr_adhan.seek(0)
-
-alarm = SoundLoader.load('res/alarm.mp3')
-alarm.seek(0)
 
 
 def get_tomorrow_date():
@@ -644,7 +630,7 @@ class PrayerPane(MDGridLayout):
       self.add_widget(self.prayer_time_widgets[prayer_time])
 
     self.get_prayer_times()
-    self.alarm_popup_service = AlarmDismissPopup()
+    self.alarm_popup_service = AlarmDismissPopup(audio_player)
     self.alarm_schedule = None
     self.alarm_reset_schedule = None
 
@@ -692,8 +678,6 @@ class PrayerPane(MDGridLayout):
       self.alarm_reset_schedule.cancel()
     self.alarm_schedule = Clock.schedule_once(self.play_alarm,
                                               (time_of_alarm - datetime.datetime.now()).total_seconds())
-    self.alarm_reset_schedule = Clock.schedule_once(self.reset_alarm,
-                                                    (time_of_alarm - datetime.datetime.now()).total_seconds() + 17)
 
   def get_time_of_prayer(self, time_string):
     """
@@ -714,22 +698,7 @@ class PrayerPane(MDGridLayout):
     """
     if not self.alarm_popup_service.is_open:
       self.alarm_popup_service.open()
-    alarm.play()
-
-  def reset_alarm(self, *args):
-    """
-    Resets alarm sound to the 0th time, and reschedules alarm if it's not dismissed yet.
-    :param args: Args given by Kivy
-    :return: None
-    """
-    alarm.seek(0)
-    global keep_playing_alarm
-
-    if keep_playing_alarm:
-      Clock.schedule_once(self.play_alarm, 0)
-      Clock.schedule_once(self.reset_alarm, 17)
-    else:
-      keep_playing_alarm = True
+      audio_player.play_alarm()
 
 
 class PrayerTimeLayout(MDGridLayout):
@@ -762,7 +731,7 @@ class PrayerTimeLayout(MDGridLayout):
                                               font_size="8sp")
     self.add_widget(self.todays_time_widget)
     self.add_widget(self.tomorrows_time_widget)
-    self.alarm_popup_service = AlarmDismissPopup()
+    self.alarm_popup_service = AlarmDismissPopup(audio_player)
 
     self.adhan_schedule = None
     self.adhan_reset_schedule = None
@@ -787,7 +756,7 @@ class PrayerTimeLayout(MDGridLayout):
     self.adhan_reset_schedule = Clock.schedule_once(self.reset_adhan,
                                                     (time_of_prayer - datetime.datetime.now()).total_seconds() + 120)
 
-    if fajr_alarm and self.prayer_time == 'Fajr':
+    if self.prayer_time == 'Fajr':
       self.schedule_alarm_before_prayer()
 
   def schedule_alarm_before_prayer(self):
@@ -805,8 +774,6 @@ class PrayerTimeLayout(MDGridLayout):
       self.alarm_reset_schedule.cancel()
     self.alarm_schedule = Clock.schedule_once(self.play_alarm,
                                               (time_of_prayer - datetime.datetime.now()).total_seconds() - 600)
-    self.alarm_reset_schedule = Clock.schedule_once(self.reset_alarm, (
-            time_of_prayer - datetime.datetime.now()).total_seconds() - 600 + 17)
 
   def play_alarm(self, *args):
     """
@@ -814,9 +781,9 @@ class PrayerTimeLayout(MDGridLayout):
     :param args: Args given by Kivy
     :return: None
     """
-    alarm.play()
     if not self.alarm_popup_service.is_open:
       self.alarm_popup_service.open()
+      audio_player.play_alarm()
 
   def play_adhan(self, *args):
     """
@@ -828,21 +795,6 @@ class PrayerTimeLayout(MDGridLayout):
       fajr_adhan.play()
     else:
       adhan.play()
-
-  def reset_alarm(self, *args):
-    """
-    Resets alarm sound to the 0th time, and reschedules alarm if it's not dismissed yet.
-    :param args: Args given by Kivy
-    :return: None
-    """
-    alarm.seek(0)
-    global keep_playing_alarm
-
-    if keep_playing_alarm:
-      Clock.schedule_once(self.play_alarm, 0)
-      Clock.schedule_once(self.reset_alarm, 17)
-    else:
-      keep_playing_alarm = True
 
   def reset_adhan(self, *args):
     """
@@ -1049,42 +1001,3 @@ class EnableDarkModeSetting(AnchorLayout):
 
     self.add_widget(self.text_anchor_layout)
     self.add_widget(self.dark_mode_checkbox_anchor_layout)
-
-
-class AlarmDismissPopup:
-  """
-  Creates a MDDialog to dismiss the alarm and holds logic to show dialog, dismiss dialog and shut off alarm.
-  """
-
-  def __init__(self):
-    """
-    Creates an AlarmDismissPopup
-    """
-    self.popup_layout = MDGridLayout(cols=1, padding=10)
-
-    self.dismiss_button = MDRaisedButton(text="Dismiss")
-    self.dismiss_button.bind(on_press=self.dismiss)
-
-    self.alarm_popup = MDDialog(title='Dismiss Alarm',
-                                size_hint=(0.75, 0.75),
-                                buttons=[self.dismiss_button])
-    self.alarm_popup.on_touch_up(self.dismiss)
-    self.is_open = False
-
-  def dismiss(self, *args):
-    """
-    Dismisses the alarm popup and silences the alarm.
-    :param args: Args sent by Kivy
-    :return: None
-    """
-    self.alarm_popup.dismiss()
-    update_keep_playing_alarm(False)
-    self.is_open = False
-
-  def open(self):
-    """
-    Opens the alarm dismissal popup
-    :return: None
-    """
-    self.alarm_popup.open()
-    self.is_open = True
