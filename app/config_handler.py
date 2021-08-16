@@ -75,30 +75,32 @@ class ConfigHandler:
         Reads the various setting parameters from a config file.
         """
         config_file = Path(FILE)
+
+        self.settings = {}
         if not config_file.exists():
-            self.enable_dark_mode = False
-            self.set_fajr_alarm = False
-            self.set_tahajjud_alarm = False
-            self.use_fahrenheit = False
-            self.use_hanafi_method = False
+            self.settings[constants.CONFIG_ENABLE_DARK_MODE_KEY] = False
+            self.settings[constants.CONFIG_FAJR_ALARM_KEY] = False
+            self.settings[constants.CONFIG_TAHAJJUD_ALARM_KEY] = False
+            self.settings[constants.CONFIG_USE_FAHRENHEIT_KEY] = False
+            self.settings[constants.CONFIG_USE_HANAFI_METHOD_KEY] = False
         else:
             config = ConfigParser()
             config.read(FILE)
 
-            self.enable_dark_mode = config.getboolean(
-                constants.CONFIG_THEME_SECTION, "ENABLE_DARK_MODE"
+            self.settings[constants.CONFIG_ENABLE_DARK_MODE_KEY] = config.getboolean(
+                constants.CONFIG_THEME_SECTION, constants.CONFIG_ENABLE_DARK_MODE_KEY
             )
-            self.set_fajr_alarm = config.getboolean(
-                constants.CONFIG_ALARM_SECTION, "FAJR_ALARM"
+            self.settings[constants.CONFIG_FAJR_ALARM_KEY] = config.getboolean(
+                constants.CONFIG_ALARM_SECTION, constants.CONFIG_FAJR_ALARM_KEY
             )
-            self.set_tahajjud_alarm = config.getboolean(
-                constants.CONFIG_ALARM_SECTION, "TAHAJJUD_ALARM"
+            self.settings[constants.CONFIG_TAHAJJUD_ALARM_KEY] = config.getboolean(
+                constants.CONFIG_ALARM_SECTION, constants.CONFIG_TAHAJJUD_ALARM_KEY
             )
-            self.use_fahrenheit = config.getboolean(
-                constants.CONFIG_MISC_SECTION, "USE_FAHRENHEIT"
+            self.settings[constants.CONFIG_USE_FAHRENHEIT_KEY] = config.getboolean(
+                constants.CONFIG_MISC_SECTION, constants.CONFIG_USE_FAHRENHEIT_KEY
             )
-            self.use_hanafi_method = config.getboolean(
-                constants.CONFIG_MISC_SECTION, "USE_HANAFI_METHOD"
+            self.settings[constants.CONFIG_USE_HANAFI_METHOD_KEY] = config.getboolean(
+                constants.CONFIG_MISC_SECTION, constants.CONFIG_USE_HANAFI_METHOD_KEY
             )
 
     def write_to_config(self):
@@ -115,39 +117,34 @@ class ConfigHandler:
         config.add_section(constants.CONFIG_MISC_SECTION)
         config.set(
             constants.CONFIG_THEME_SECTION,
-            "ENABLE_DARK_MODE",
+            constants.CONFIG_ENABLE_DARK_MODE_KEY,
             str(self.enable_dark_mode),
         )
         config.set(
-            constants.CONFIG_ALARM_SECTION, "FAJR_ALARM", str(self.set_fajr_alarm)
+            constants.CONFIG_ALARM_SECTION,
+            constants.CONFIG_FAJR_ALARM_KEY,
+            str(self.set_fajr_alarm),
         )
         config.set(
             constants.CONFIG_ALARM_SECTION,
-            "TAHAJJUD_ALARM",
+            constants.CONFIG_TAHAJJUD_ALARM_KEY,
             str(self.set_tahajjud_alarm),
         )
         config.set(
-            constants.CONFIG_MISC_SECTION, "USE_FAHRENHEIT", str(self.use_fahrenheit)
+            constants.CONFIG_MISC_SECTION,
+            constants.CONFIG_USE_FAHRENHEIT_KEY,
+            str(self.use_fahrenheit),
         )
         config.set(
             constants.CONFIG_MISC_SECTION,
-            "USE_HANAFI_METHOD",
+            constants.CONFIG_USE_HANAFI_METHOD_KEY,
             str(self.use_hanafi_method),
         )
         with open(file, "w+") as configfile:
             config.write(configfile)
 
-    def set_enable_dark_mode(self, enable_dark_mode_):
-        self.enable_dark_mode = enable_dark_mode_
+    def update_settings(self, key, value):
+        self.settings[key] = value
 
-    def set_set_fajr_alarm(self, set_fajr_alarm_):
-        self.set_fajr_alarm = set_fajr_alarm_
-
-    def set_set_tahajjud_alarm(self, set_tahajjud_alarm_):
-        self.set_tahajjud_alarm = set_tahajjud_alarm_
-
-    def set_use_fahrenheit(self, use_fahrenheit_):
-        self.use_fahrenheit = use_fahrenheit_
-
-    def set_use_hanafi_method(self, use_hanafi_method_):
-        self.use_hanafi_method = use_hanafi_method_
+    def get_setting(self, key):
+        return self.settings[key]
