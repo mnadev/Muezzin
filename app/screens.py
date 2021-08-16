@@ -14,7 +14,8 @@ import concurrent.futures
 from config_handler import ConfigHandler
 import constants
 import datetime
-from settings_screen import SettingsScreen
+from helper import celcius_to_fahrenheit, get_tomorrow_date
+from moon_widget import MoonWidget
 
 audio_player = AudioPlayer()
 config_handler = ConfigHandler()
@@ -26,30 +27,12 @@ if True:
   default_text_color = [0.61, 0.81, 0.01, 0.76]
   default_clock_color = [1, 1, 1, 1]
 
-def celcius_to_fahrenheit(celsius):
-  """
-  Converts a temperature from celcius to fahrenheit
-  :param celsius: The temperature in Celcius
-  :return: The converted fahrenheit temperature
-  """
-  return round((celsius * 9 / 5) + 32, 2)
-
 
 adhan = SoundLoader.load('res/adhan.mp3')
 adhan.seek(0)
 
 fajr_adhan = SoundLoader.load('res/fajr_adhan.mp3')
 fajr_adhan.seek(0)
-
-
-def get_tomorrow_date():
-  """
-  Creates and returns a datetime object representing tomorrow at midnight
-  :return: A datetime object representing tomorrow at midnight
-  """
-  today = datetime.datetime.today()
-  today = today.replace(hour=0, minute=0, second=0, microsecond=0)
-  return today + datetime.timedelta(days=1)
 
 
 class InformationScreen(MDGridLayout):
@@ -191,78 +174,6 @@ class WeatherWidget(MDGridLayout):
       self.current_text.text = "Current: " + ('%.2f' % self.weather["the_temp"]) + " °C"
       self.low_text.text = "High: " + ('%.2f' % self.weather["max_temp"]) + " °C"
       self.high_text.text = "Low: " + ('%.2f' % self.weather["min_temp"]) + " °C"
-
-
-class MoonWidget(MDGridLayout):
-  """
-  A widget that displays the current moon phase along with a picture. Updates moon phase daily.
-  """
-
-  def __init__(self, **kwargs):
-    """
-    Creates a MoonWidget object
-    :param kwargs: Kwargs for MDGridLayout
-    """
-    super(MoonWidget, self).__init__(**kwargs)
-    self.cols = 1
-    self.rows = 2
-    moon_phase = self.update_moon_phase()
-    self.size_hint = (0.8, 0.8)
-    self.orientation = "horizontal"
-    self.moon_text = Label(text=moon_phase, color=default_text_color, font_name="RobotoMono-Regular", size_hint=(1, 1),
-                           font_size="15sp")
-    self.image = Image(source=self.get_moon_pic(moon_phase))
-
-    self.add_widget(self.moon_text)
-    self.add_widget(self.image)
-    self.moon_schedule = Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60)
-
-  def update_moon_phase(self):
-    """
-    Calls API to get current moon phase
-    :return: Results of API call to get current moon phase
-    """
-    return getter.get_moon_phase()
-
-  def update(self, *args):
-    """
-    Updates moon phase text and moon phase image and schedules daily updates.
-    :param args: Args given by Kivy
-    :return: None
-    """
-    moon_phase = self.update_moon_phase()
-    self.moon_text.text = moon_phase
-    self.image.source = self.get_moon_pic(moon_phase)
-
-    self.moon_schedule.cancel()
-    self.moon_schedule = Clock.schedule_once(self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60)
-
-  def get_moon_pic(self, moon_phase_text):
-    """
-    Returns a file path to a picture of a moon phase given a text describing the current moon phase
-    :param moon_phase_text: The text describing the current moon phase
-    :return: the file path to the current moon phase picture
-    """
-
-    # Images courtesy of freepik/flaticon
-    if moon_phase_text.lower() == "full moon":
-      return "res/full_moon.png"
-    elif moon_phase_text.lower() == "new moon":
-      return "res/new_moon.png"
-    elif moon_phase_text.lower() == "first quarter":
-      return "res/first_quarter.png"
-    elif moon_phase_text.lower() == "last quarter":
-      return "res/third_quarter.png"
-    elif moon_phase_text.lower() == "new moon":
-      return "res/new_moon.png"
-    elif moon_phase_text.lower() == "waxing gibbous":
-      return "res/waxing_gibbous.png"
-    elif moon_phase_text.lower() == "waning gibbous":
-      return "res/waning_gibbous.png"
-    elif moon_phase_text.lower() == "waxing crescent":
-      return "res/waxing_crescent.png"
-    else:
-      return "res/waning_crescent.png"
 
 
 class MainScreen(MDGridLayout):
