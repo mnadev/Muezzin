@@ -1,6 +1,6 @@
 # Muezzin
 
-**Muezzin has been deprecated. This repository will no longer be updated. I felt the scope 
+[comment]: **Muezzin has been deprecated. This repository will no longer be updated. I felt the scope 
 of this project could be more impactful and that will require changes. I am keeping this 
 repository for the benefit of others. If you'd like to contribute to the successor of Muezzin,
 let me know.**
