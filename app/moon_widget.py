@@ -12,6 +12,18 @@ from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivymd.uix.gridlayout import MDGridLayout
 
+moon_phase_images = {
+    "full moon": "res/full_moon.png",
+    "new moon": "res/new_moon.png",
+    "first quarter": "res/first_quarter.png",
+    "last quarter": "res/third_quarter.png",
+    "new moon": "res/new_moon.png",
+    "waxing gibbous": "res/waxing_gibbous.png",
+    "waning gibbous": "res/waning_gibbous.png",
+    "waxing crescent": "res/waxing_crescent.png",
+    "waning crescent": "res/waning_crescent.png",
+}
+
 
 class MoonWidget(MDGridLayout):
     """
@@ -41,7 +53,7 @@ class MoonWidget(MDGridLayout):
             size_hint=(1, 1),
             font_size="15sp",
         )
-        self.image = Image(source=self.get_moon_pic(moon_phase))
+        self.image = Image(source=moon_phase_images[moon_phase.lower()])
 
         self.add_widget(self.moon_text)
         self.add_widget(self.image)
@@ -64,36 +76,9 @@ class MoonWidget(MDGridLayout):
         """
         moon_phase = self.update_moon_phase()
         self.moon_text.text = moon_phase
-        self.image.source = self.get_moon_pic(moon_phase)
+        self.image.source = moon_phase_images[moon_phase.lower()]
 
         self.moon_schedule.cancel()
         self.moon_schedule = Clock.schedule_once(
             self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60
         )
-
-    def get_moon_pic(self, moon_phase_text):
-        """
-        Returns a file path to a picture of a moon phase given a text describing the current moon phase
-        :param moon_phase_text: The text describing the current moon phase
-        :return: the file path to the current moon phase picture
-        """
-
-        # Images courtesy of freepik/flaticon
-        if moon_phase_text.lower() == "full moon":
-            return "res/full_moon.png"
-        elif moon_phase_text.lower() == "new moon":
-            return "res/new_moon.png"
-        elif moon_phase_text.lower() == "first quarter":
-            return "res/first_quarter.png"
-        elif moon_phase_text.lower() == "last quarter":
-            return "res/third_quarter.png"
-        elif moon_phase_text.lower() == "new moon":
-            return "res/new_moon.png"
-        elif moon_phase_text.lower() == "waxing gibbous":
-            return "res/waxing_gibbous.png"
-        elif moon_phase_text.lower() == "waning gibbous":
-            return "res/waning_gibbous.png"
-        elif moon_phase_text.lower() == "waxing crescent":
-            return "res/waxing_crescent.png"
-        else:
-            return "res/waning_crescent.png"
