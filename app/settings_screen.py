@@ -55,7 +55,7 @@ class SettingsScreen(MDGridLayout):
         )
         self.add_widget(
             SettingSwitchItem(
-                "Use Hanaji juristic method for Asr",
+                "Use Hanafi juristic method for Asr",
                 config_handler,
                 CONFIG_USE_HANAFI_METHOD_KEY,
             )
