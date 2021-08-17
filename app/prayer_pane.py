@@ -60,6 +60,10 @@ class PrayerPane(MDGridLayout):
         self.alarm_popup_service = AlarmDismissPopup(audio_player)
         self.alarm_schedule = None
 
+        Clock.schedule_once(
+            self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds
+        )
+
     def get_prayer_times(self):
         """
         Updates today's and tomorrow's prayer times
