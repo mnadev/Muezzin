@@ -1,4 +1,12 @@
-import constants
+from constants import (
+    CONFIG_ENABLE_DARK_MODE_KEY,
+    CONFIG_FAJR_ALARM_KEY,
+    CONFIG_TAHAJJUD_ALARM_KEY,
+    CONFIG_USE_FAHRENHEIT_KEY,
+    CONFIG_USE_HANAFI_METHOD_KEY,
+    DARK_THEME_TEXT_COLOR,
+    LIGHT_THEME_TEXT_COLOR,
+)
 from kivy.uix.label import Label
 from kivymd.uix.gridlayout import MDGridLayout
 from setting_switch_item import SettingSwitchItem
@@ -21,7 +29,9 @@ class SettingsScreen(MDGridLayout):
         self.add_widget(
             Label(
                 text="Settings",
-                color=constants.DEFAULT_TEXT_COLOR,
+                color=DARK_THEME_TEXT_COLOR
+                if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+                else LIGHT_THEME_TEXT_COLOR,
                 font_name="RobotoMono-Regular",
                 size_hint=(1, 0.5),
                 font_size="30sp",
@@ -31,34 +41,34 @@ class SettingsScreen(MDGridLayout):
             SettingSwitchItem(
                 "Set alarm for 10 minutes before Fajr",
                 config_handler,
-                constants.CONFIG_FAJR_ALARM_KEY,
+                CONFIG_FAJR_ALARM_KEY,
             )
         )
         self.add_widget(
             SettingSwitchItem(
                 "Set alarm for last third of night",
                 config_handler,
-                constants.CONFIG_TAHAJJUD_ALARM_KEY,
+                CONFIG_TAHAJJUD_ALARM_KEY,
             )
         )
         self.add_widget(
             SettingSwitchItem(
                 "Use Hanaji juristic method for Asr",
                 config_handler,
-                constants.CONFIG_USE_HANAFI_METHOD_KEY,
+                CONFIG_USE_HANAFI_METHOD_KEY,
             )
         )
         self.add_widget(
             SettingSwitchItem(
                 "Display temp in Fahrenheit (default: Celcius)",
                 config_handler,
-                constants.CONFIG_USE_FAHRENHEIT_KEY,
+                CONFIG_USE_FAHRENHEIT_KEY,
             )
         )
         self.add_widget(
             SettingSwitchItem(
                 "Enable Sith/Dark Mode (default: Jedi/light mode)",
                 config_handler,
-                constants.CONFIG_ENABLE_DARK_MODE_KEY,
+                CONFIG_ENABLE_DARK_MODE_KEY,
             )
         )

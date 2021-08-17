@@ -1,7 +1,11 @@
 import datetime
 
 from alarm_popup import AlarmDismissPopup
-from constants import DEFAULT_TEXT_COLOR
+from constants import (
+    CONFIG_ENABLE_DARK_MODE_KEY,
+    DARK_THEME_TEXT_COLOR,
+    LIGHT_THEME_TEXT_COLOR,
+)
 from kivy.clock import Clock
 from kivymd.uix.gridlayout import MDGridLayout
 from wrapped_label import WrappedLabel
@@ -33,13 +37,17 @@ class PrayerTimeLayout(MDGridLayout):
 
         self.todays_time_widget = WrappedLabel(
             text=self.prayer_time + ": " + self.todays_times[self.prayer_time],
-            color=DEFAULT_TEXT_COLOR,
+            color=DARK_THEME_TEXT_COLOR
+            if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+            else LIGHT_THEME_TEXT_COLOR,
             font_name="Roboto-BoldItalic",
             font_size="15sp",
         )
         self.tomorrows_time_widget = WrappedLabel(
             text="Tomorrow: " + self.tomorrow_times[self.prayer_time],
-            color=DEFAULT_TEXT_COLOR,
+            color=DARK_THEME_TEXT_COLOR
+            if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+            else LIGHT_THEME_TEXT_COLOR,
             font_name="Roboto-BoldItalic",
             font_size="8sp",
         )

@@ -1,16 +1,6 @@
-from audio_player import AudioPlayer
-from config_handler import ConfigHandler
-from kivy.core.audio import SoundLoader
 from kivymd.uix.gridlayout import MDGridLayout
 from prayer_pane import PrayerPane
 from time_pane import TimePane
-
-default_text_color = [0.65, 0.7, 0.01, 1]
-default_clock_color = [0, 0, 0, 1]
-
-if True:
-    default_text_color = [0.61, 0.81, 0.01, 0.76]
-    default_clock_color = [1, 1, 1, 1]
 
 
 class MainScreen(MDGridLayout):

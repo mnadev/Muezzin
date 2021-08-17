@@ -5,7 +5,8 @@ import api_controller as getter
 from constants import (
     CONFIG_ENABLE_DARK_MODE_KEY,
     CONFIG_USE_HANAFI_METHOD_KEY,
-    DEFAULT_TEXT_COLOR,
+    DARK_THEME_TEXT_COLOR,
+    LIGHT_THEME_TEXT_COLOR,
 )
 from helper import get_tomorrow_date
 from kivy.clock import Clock
@@ -34,7 +35,9 @@ class CalendarBox(MDGridLayout):
         gregorian_date = getter.get_gregorian_date()
         self.gregorian_widget = WrappedLabel(
             text=gregorian_date["formatted_string"],
-            color=DEFAULT_TEXT_COLOR,
+            color=DARK_THEME_TEXT_COLOR
+            if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+            else LIGHT_THEME_TEXT_COLOR,
             font_name="Roboto-Bold",
             font_size="16sp",
             size_hint=(0.5, 1),
@@ -43,7 +46,9 @@ class CalendarBox(MDGridLayout):
 
         self.hijri_widget = WrappedLabel(
             text="14 Ramadan 1440 AH",
-            color=DEFAULT_TEXT_COLOR,
+            color=DARK_THEME_TEXT_COLOR
+            if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+            else LIGHT_THEME_TEXT_COLOR,
             font_name="Roboto-Bold",
             font_size="16sp",
             size_hint=(0.5, 1),

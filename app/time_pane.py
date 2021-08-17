@@ -1,7 +1,11 @@
 import datetime
 
 from calendar_box import CalendarBox
-from constants import DEFAULT_CLOCK_COLOR
+from constants import (
+    CONFIG_ENABLE_DARK_MODE_KEY,
+    DARK_THEME_CLOCK_COLOR,
+    LIGHT_THEME_CLOCK_COLOR,
+)
 from kivy.clock import Clock
 from kivy.uix.label import Label
 from kivymd.uix.button import MDRectangleFlatIconButton
@@ -23,7 +27,9 @@ class TimePane(MDGridLayout):
         self.rows = 3
         self.time_widget = Label(
             text=datetime.datetime.now().strftime("%I:%M %p"),
-            color=DEFAULT_CLOCK_COLOR,
+            color=DARK_THEME_CLOCK_COLOR
+            if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+            else LIGHT_THEME_CLOCK_COLOR,
             font_name="RobotoMono-Regular",
             size_hint=(1, 0.5),
             font_size="50sp",
@@ -35,7 +41,11 @@ class TimePane(MDGridLayout):
         Clock.schedule_once(self.update, 60 - datetime.datetime.now().second % 60)
 
         self.adhan_play_button = MDRectangleFlatIconButton(
-            icon="play", text="Play adhan", text_color=DEFAULT_CLOCK_COLOR
+            icon="play",
+            text="Play adhan",
+            text_color=DARK_THEME_CLOCK_COLOR
+            if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+            else LIGHT_THEME_CLOCK_COLOR,
         )
         self.adhan_play_button.bind(on_press=self.play_adhan)
         self.add_widget(self.adhan_play_button)

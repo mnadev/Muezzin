@@ -2,7 +2,12 @@ import concurrent.futures
 import datetime
 
 import api_controller as getter
-from constants import CONFIG_USE_FAHRENHEIT_KEY, DEFAULT_TEXT_COLOR
+from constants import (
+    CONFIG_ENABLE_DARK_MODE_KEY,
+    CONFIG_USE_FAHRENHEIT_KEY,
+    DARK_THEME_TEXT_COLOR,
+    LIGHT_THEME_TEXT_COLOR,
+)
 from helper import celcius_to_fahrenheit
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.image import CoreImage, Image
@@ -31,25 +36,33 @@ class WeatherWidget(MDGridLayout):
 
         self.weather_text = Label(
             text=self.weather["weather_state_name"],
-            color=DEFAULT_TEXT_COLOR,
+            color=DARK_THEME_TEXT_COLOR
+            if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+            else LIGHT_THEME_TEXT_COLOR,
             font_name="RobotoMono-Regular",
             size_hint=(1, 1),
             font_size="15sp",
         )
         self.current_text = Label(
-            color=DEFAULT_TEXT_COLOR,
+            color=DARK_THEME_TEXT_COLOR
+            if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+            else LIGHT_THEME_TEXT_COLOR,
             font_name="RobotoMono-Regular",
             size_hint=(1, 1),
             font_size="15sp",
         )
         self.low_text = Label(
-            color=DEFAULT_TEXT_COLOR,
+            color=DARK_THEME_TEXT_COLOR
+            if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+            else LIGHT_THEME_TEXT_COLOR,
             font_name="RobotoMono-Regular",
             size_hint=(1, 1),
             font_size="10sp",
         )
         self.high_text = Label(
-            color=DEFAULT_TEXT_COLOR,
+            color=DARK_THEME_TEXT_COLOR
+            if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+            else LIGHT_THEME_TEXT_COLOR,
             font_name="RobotoMono-Regular",
             size_hint=(1, 1),
             font_size="10sp",

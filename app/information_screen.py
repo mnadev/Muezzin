@@ -1,4 +1,8 @@
-from constants import DEFAULT_TEXT_COLOR
+from constants import (
+    CONFIG_ENABLE_DARK_MODE_KEY,
+    DARK_THEME_TEXT_COLOR,
+    LIGHT_THEME_TEXT_COLOR,
+)
 from kivy.uix.label import Label
 from kivymd.uix.gridlayout import MDGridLayout
 from moon_widget import MoonWidget
@@ -23,7 +27,9 @@ class InformationScreen(MDGridLayout):
         self.add_widget(
             Label(
                 text="Current moon phase",
-                color=DEFAULT_TEXT_COLOR,
+                color=DARK_THEME_TEXT_COLOR
+                if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+                else LIGHT_THEME_TEXT_COLOR,
                 font_name="RobotoMono-Regular",
                 size_hint=(0.5, 0.5),
                 font_size="25sp",
@@ -33,7 +39,9 @@ class InformationScreen(MDGridLayout):
         self.add_widget(
             Label(
                 text="Current Weather",
-                color=DEFAULT_TEXT_COLOR,
+                color=DARK_THEME_TEXT_COLOR
+                if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+                else LIGHT_THEME_TEXT_COLOR,
                 font_name="RobotoMono-Regular",
                 size_hint=(1, 0.5),
                 font_size="25sp",

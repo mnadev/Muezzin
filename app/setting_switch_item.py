@@ -1,4 +1,8 @@
-import constants
+from constants import (
+    CONFIG_ENABLE_DARK_MODE_KEY,
+    DARK_THEME_TEXT_COLOR,
+    LIGHT_THEME_TEXT_COLOR,
+)
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.label import Label
 from kivymd.uix.selectioncontrol import MDSwitch
@@ -19,7 +23,9 @@ class SettingSwitchItem(AnchorLayout):
         self.text_anchor_layout.add_widget(
             Label(
                 text=display_text,
-                color=constants.DEFAULT_TEXT_COLOR,
+                color=DARK_THEME_TEXT_COLOR
+                if self.config_handler.get_setting(CONFIG_ENABLE_DARK_MODE_KEY)
+                else LIGHT_THEME_TEXT_COLOR,
                 font_name="RobotoMono-Regular",
                 size_hint=(1, 0.5),
                 font_size="10sp",
