@@ -25,6 +25,10 @@ class TimePane(MDGridLayout):
         super(TimePane, self).__init__(**kwargs)
         self.cols = 1
         self.rows = 3
+
+        self.audio_player = audio_player
+        self.config_handler = config_handler
+
         self.time_widget = Label(
             text=datetime.datetime.now().strftime("%I:%M %p"),
             color=DARK_THEME_CLOCK_COLOR
@@ -49,8 +53,6 @@ class TimePane(MDGridLayout):
         )
         self.adhan_play_button.bind(on_press=self.play_adhan)
         self.add_widget(self.adhan_play_button)
-
-        self.audio_player = audio_player
 
     def update(self, *args):
         """

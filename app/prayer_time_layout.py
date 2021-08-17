@@ -18,7 +18,13 @@ class PrayerTimeLayout(MDGridLayout):
     """
 
     def __init__(
-        self, audio_player, prayer_time, todays_times, tomorrow_times, **kwargs
+        self,
+        audio_player,
+        config_handler,
+        prayer_time,
+        todays_times,
+        tomorrow_times,
+        **kwargs
     ):
         """
         Creates a PrayerTimeLayout object
@@ -30,6 +36,8 @@ class PrayerTimeLayout(MDGridLayout):
         super(PrayerTimeLayout, self).__init__(**kwargs)
         self.cols = 1
         self.rows = 2
+
+        self.config_handler = config_handler
 
         self.prayer_time = prayer_time
         self.todays_times = todays_times
@@ -56,9 +64,7 @@ class PrayerTimeLayout(MDGridLayout):
         self.alarm_popup_service = AlarmDismissPopup(audio_player)
 
         self.adhan_schedule = None
-        self.adhan_reset_schedule = None
         self.alarm_schedule = None
-        self.alarm_reset_schedule = None
 
     def schedule_adhan(self):
         """
@@ -73,14 +79,8 @@ class PrayerTimeLayout(MDGridLayout):
 
         if self.adhan_schedule is not None:
             self.adhan_schedule.cancel()
-        if self.adhan_reset_schedule is not None:
-            self.adhan_reset_schedule.cancel()
         self.adhan_schedule = Clock.schedule_once(
             self.play_adhan, (time_of_prayer - datetime.datetime.now()).total_seconds()
-        )
-        self.adhan_reset_schedule = Clock.schedule_once(
-            self.reset_adhan,
-            (time_of_prayer - datetime.datetime.now()).total_seconds() + 120,
         )
 
         if self.prayer_time == "Fajr":
@@ -99,8 +99,6 @@ class PrayerTimeLayout(MDGridLayout):
 
         if self.alarm_schedule is not None:
             self.alarm_schedule.cancel()
-        if self.alarm_reset_schedule is not None:
-            self.alarm_reset_schedule.cancel()
         self.alarm_schedule = Clock.schedule_once(
             self.play_alarm,
             (time_of_prayer - datetime.datetime.now()).total_seconds() - 600,

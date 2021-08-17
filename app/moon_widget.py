@@ -18,7 +18,7 @@ class MoonWidget(MDGridLayout):
     A widget that displays the current moon phase along with a picture. Updates moon phase daily.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, config_handler, **kwargs):
         """
         Creates a MoonWidget object
         :param kwargs: Kwargs for MDGridLayout
@@ -26,6 +26,9 @@ class MoonWidget(MDGridLayout):
         super(MoonWidget, self).__init__(**kwargs)
         self.cols = 1
         self.rows = 2
+
+        self.config_handler = config_handler
+
         moon_phase = self.update_moon_phase()
         self.size_hint = (0.8, 0.8)
         self.orientation = "horizontal"

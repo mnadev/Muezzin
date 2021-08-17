@@ -48,14 +48,17 @@ class PrayerPane(MDGridLayout):
         self.prayer_time_widgets = dict()
         for prayer_time in ["Fajr", "Duha", "Dhuhr", "Asr", "Maghrib", "Isha"]:
             self.prayer_time_widgets[prayer_time] = PrayerTimeLayout(
-                audio_player, prayer_time, self.todays_times, self.tomorrow_times
+                audio_player,
+                config_handler,
+                prayer_time,
+                self.todays_times,
+                self.tomorrow_times,
             )
             self.add_widget(self.prayer_time_widgets[prayer_time])
 
         self.get_prayer_times()
         self.alarm_popup_service = AlarmDismissPopup(audio_player)
         self.alarm_schedule = None
-        self.alarm_reset_schedule = None
 
     def get_prayer_times(self):
         """
@@ -106,8 +109,6 @@ class PrayerPane(MDGridLayout):
         time_of_alarm = todays_isha + datetime.timedelta(seconds=third_of_night)
         if self.alarm_schedule is not None:
             self.alarm_schedule.cancel()
-        if self.alarm_reset_schedule is not None:
-            self.alarm_reset_schedule.cancel()
         self.alarm_schedule = Clock.schedule_once(
             self.play_alarm, (time_of_alarm - datetime.datetime.now()).total_seconds()
         )

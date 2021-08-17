@@ -22,7 +22,10 @@ class InformationScreen(MDGridLayout):
         super(InformationScreen, self).__init__(**kwargs)
         self.cols = 1
         self.rows = 4
-        self.moon_widget = MoonWidget()
+
+        self.config_handler = config_handler
+
+        self.moon_widget = MoonWidget(config_handler)
         self.weather_widget = WeatherWidget(config_handler)
         self.add_widget(
             Label(

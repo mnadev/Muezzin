@@ -26,6 +26,8 @@ class SettingsScreen(MDGridLayout):
         self.cols = 1
         self.rows = 6
 
+        self.config_handler = config_handler
+
         self.add_widget(
             Label(
                 text="Settings",

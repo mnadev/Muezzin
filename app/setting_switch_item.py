@@ -19,6 +19,9 @@ class SettingSwitchItem(AnchorLayout):
         :param kwargs: Arguments for Anchor Layout
         """
         super(SettingSwitchItem, self).__init__(**kwargs)
+
+        self.config_handler = config_handler
+
         self.text_anchor_layout = AnchorLayout(anchor_x="left", anchor_y="top")
         self.text_anchor_layout.add_widget(
             Label(
@@ -33,7 +36,6 @@ class SettingSwitchItem(AnchorLayout):
         )
 
         self.setting_key = setting_key
-        self.config_handler = config_handler
 
         self.dark_mode_checkbox = MDSwitch(
             active=config_handler.get_setting(setting_key)
