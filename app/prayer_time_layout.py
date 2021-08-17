@@ -89,7 +89,7 @@ class PrayerTimeLayout(MDGridLayout):
     """
     if not self.alarm_popup_service.is_open:
       self.alarm_popup_service.open()
-      audio_player.play_alarm()
+      self.audio_player.play_alarm()
 
   def play_adhan(self, *args):
     """
@@ -98,20 +98,9 @@ class PrayerTimeLayout(MDGridLayout):
     :return: None
     """
     if self.prayer_time == 'Fajr':
-      fajr_adhan.play()
+      self.audio_player.play_fajr_adhan()
     else:
-      adhan.play()
-
-  def reset_adhan(self, *args):
-    """
-    Resets adhan sound to the 0th time
-    :param args: Args given by Kivy
-    :return: None
-    """
-    if self.prayer_time == 'Fajr':
-      fajr_adhan.seek(0)
-    else:
-      adhan.seek(0)
+      self.audio_player.play_adhan()
 
   def get_time_of_prayer(self, time_string):
     """
