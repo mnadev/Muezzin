@@ -78,33 +78,34 @@ class ConfigHandler:
         config.set(
             constants.CONFIG_THEME_SECTION,
             constants.CONFIG_ENABLE_DARK_MODE_KEY,
-            str(self.enable_dark_mode),
+            str(self.settings[constants.CONFIG_ENABLE_DARK_MODE_KEY]),
         )
         config.set(
             constants.CONFIG_ALARM_SECTION,
             constants.CONFIG_FAJR_ALARM_KEY,
-            str(self.set_fajr_alarm),
+            str(self.settings[constants.CONFIG_FAJR_ALARM_KEY]),
         )
         config.set(
             constants.CONFIG_ALARM_SECTION,
             constants.CONFIG_TAHAJJUD_ALARM_KEY,
-            str(self.set_tahajjud_alarm),
+            str(self.settings[constants.CONFIG_TAHAJJUD_ALARM_KEY]),
         )
         config.set(
             constants.CONFIG_MISC_SECTION,
             constants.CONFIG_USE_FAHRENHEIT_KEY,
-            str(self.use_fahrenheit),
+            str(self.settings[constants.CONFIG_USE_FAHRENHEIT_KEY]),
         )
         config.set(
             constants.CONFIG_MISC_SECTION,
             constants.CONFIG_USE_HANAFI_METHOD_KEY,
-            str(self.use_hanafi_method),
+            str(self.settings[constants.CONFIG_USE_HANAFI_METHOD_KEY]),
         )
         with open(file, "w+") as configfile:
             config.write(configfile)
 
     def update_settings(self, key, value):
         self.settings[key] = value
+        self.write_to_config()
 
         if key == constants.CONFIG_ENABLE_DARK_MODE_KEY:
             exit_button = MDRaisedButton(text="Exit App")
