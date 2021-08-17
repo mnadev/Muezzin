@@ -38,6 +38,7 @@ class PrayerTimeLayout(MDGridLayout):
         self.rows = 2
 
         self.config_handler = config_handler
+        self.audio_player = audio_player
 
         self.prayer_time = prayer_time
         self.todays_times = todays_times
