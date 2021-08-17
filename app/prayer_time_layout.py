@@ -71,6 +71,9 @@ class PrayerTimeLayout(MDGridLayout):
         Schedules adhan to play at the specific prayer time
         :return: None
         """
+        if self.prayer_time == "Duha":
+            return
+
         time_of_prayer = self.get_time_of_prayer(self.todays_times[self.prayer_time])
         if time_of_prayer < datetime.datetime.now():
             time_of_prayer = self.get_time_of_prayer(
