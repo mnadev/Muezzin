@@ -57,7 +57,7 @@ class PrayerPane(MDGridLayout):
             self.add_widget(self.prayer_time_widgets[prayer_time])
 
         self.get_prayer_times()
-        self.alarm_popup_service = AlarmDismissPopup(audio_player)
+        self.alarm_popup_service = AlarmDismissPopup(audio_player, config_handler)
         self.alarm_schedule = None
 
         Clock.schedule_once(

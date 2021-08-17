@@ -61,7 +61,7 @@ class PrayerTimeLayout(MDGridLayout):
         )
         self.add_widget(self.todays_time_widget)
         self.add_widget(self.tomorrows_time_widget)
-        self.alarm_popup_service = AlarmDismissPopup(audio_player)
+        self.alarm_popup_service = AlarmDismissPopup(audio_player, config_handler)
 
         self.adhan_schedule = None
         self.alarm_schedule = None
