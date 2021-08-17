@@ -1,13 +1,11 @@
-from kivymd.uix.button import MDRaisedButton
-from kivymd.uix.dialog import MDDialog
-
-from kivymd.app import MDApp
-
 from configparser import ConfigParser
 from pathlib import Path
 from sys import platform
 
 import constants
+from kivymd.app import MDApp
+from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.dialog import MDDialog
 
 FILE_PATH = ""
 if platform == "linux" or platform == "linux2" or platform == "darwin":

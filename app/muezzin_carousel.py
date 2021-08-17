@@ -1,8 +1,8 @@
-from kivy.uix.carousel import Carousel
-
 from information_screen import InformationScreen
-from settings_screen import SettingsScreen
+from kivy.uix.carousel import Carousel
 from main_screen import MainScreen
+from settings_screen import SettingsScreen
+
 
 class MuezzinCarousel(Carousel):
     """

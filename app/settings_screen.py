@@ -1,8 +1,6 @@
-from kivy.uix.label import Label
-
-from kivymd.uix.gridlayout import MDGridLayout
-
 import constants
+from kivy.uix.label import Label
+from kivymd.uix.gridlayout import MDGridLayout
 from setting_switch_item import SettingSwitchItem
 
 

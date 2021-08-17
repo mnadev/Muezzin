@@ -1,13 +1,12 @@
-from kivy.clock import Clock
-from kivy.uix.image import Image
-from kivy.uix.label import Label
-
-from kivymd.uix.gridlayout import MDGridLayout
+import datetime
 
 import api_controller as getter
 from constants import DEFAULT_TEXT_COLOR
-import datetime
 from helper import get_tomorrow_date
+from kivy.clock import Clock
+from kivy.uix.image import Image
+from kivy.uix.label import Label
+from kivymd.uix.gridlayout import MDGridLayout
 
 
 class MoonWidget(MDGridLayout):

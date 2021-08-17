@@ -1,17 +1,16 @@
-from kivy.clock import Clock
-from kivy.uix.image import Image
-
-from kivymd.uix.gridlayout import MDGridLayout
+import concurrent.futures
+import datetime
 
 import api_controller as getter
-import concurrent.futures
 from constants import (
-    DEFAULT_TEXT_COLOR,
     CONFIG_ENABLE_DARK_MODE_KEY,
     CONFIG_USE_HANAFI_METHOD_KEY,
+    DEFAULT_TEXT_COLOR,
 )
-import datetime
 from helper import get_tomorrow_date
+from kivy.clock import Clock
+from kivy.uix.image import Image
+from kivymd.uix.gridlayout import MDGridLayout
 from wrapped_label import WrappedLabel
 
 

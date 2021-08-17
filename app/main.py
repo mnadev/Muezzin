@@ -7,11 +7,10 @@ from kivy.config import Config
 Config.set("graphics", "width", "480")
 Config.set("graphics", "height", "320")
 
-from kivymd.app import MDApp
-
 from audio_player import AudioPlayer
 from config_handler import ConfigHandler
 from constants import CONFIG_ENABLE_DARK_MODE_KEY
+from kivymd.app import MDApp
 from muezzin_carousel import MuezzinCarousel
 
 audio_player = AudioPlayer()

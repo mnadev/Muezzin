@@ -1,7 +1,6 @@
-from kivymd.uix.gridlayout import MDGridLayout
-from kivy.uix.label import Label
-
 from constants import DEFAULT_TEXT_COLOR
+from kivy.uix.label import Label
+from kivymd.uix.gridlayout import MDGridLayout
 from moon_widget import MoonWidget
 from weather_widget import WeatherWidget
 

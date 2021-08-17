@@ -1,13 +1,11 @@
-from kivy.clock import Clock
-from kivy.uix.label import Label
-
-from kivymd.uix.button import MDRectangleFlatIconButton
-from kivymd.uix.gridlayout import MDGridLayout
-
 import datetime
 
 from calendar_box import CalendarBox
 from constants import DEFAULT_CLOCK_COLOR
+from kivy.clock import Clock
+from kivy.uix.label import Label
+from kivymd.uix.button import MDRectangleFlatIconButton
+from kivymd.uix.gridlayout import MDGridLayout
 
 
 class TimePane(MDGridLayout):

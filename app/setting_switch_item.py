@@ -1,9 +1,7 @@
+import constants
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.label import Label
-
 from kivymd.uix.selectioncontrol import MDSwitch
-
-import constants
 
 
 class SettingSwitchItem(AnchorLayout):

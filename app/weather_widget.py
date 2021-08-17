@@ -1,14 +1,13 @@
+import concurrent.futures
+import datetime
+
+import api_controller as getter
+from constants import CONFIG_USE_FAHRENHEIT_KEY, DEFAULT_TEXT_COLOR
+from helper import celcius_to_fahrenheit
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.image import CoreImage, Image
 from kivy.uix.label import Label
-
 from kivymd.uix.gridlayout import MDGridLayout
-
-import api_controller as getter
-import concurrent.futures
-from constants import DEFAULT_TEXT_COLOR, CONFIG_USE_FAHRENHEIT_KEY
-import datetime
-from helper import celcius_to_fahrenheit
 
 
 class WeatherWidget(MDGridLayout):
