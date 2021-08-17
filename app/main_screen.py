@@ -7,22 +7,12 @@ from config_handler import ConfigHandler
 from prayer_pane import PrayerPane
 from time_pane import TimePane
 
-audio_player = AudioPlayer()
-config_handler = ConfigHandler()
-
 default_text_color = [0.65, 0.7, 0.01, 1]
 default_clock_color = [0, 0, 0, 1]
 
 if True:
   default_text_color = [0.61, 0.81, 0.01, 0.76]
   default_clock_color = [1, 1, 1, 1]
-
-
-adhan = SoundLoader.load('res/adhan.mp3')
-adhan.seek(0)
-
-fajr_adhan = SoundLoader.load('res/fajr_adhan.mp3')
-fajr_adhan.seek(0)
 
 class MainScreen(MDGridLayout):
   """
