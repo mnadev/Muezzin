@@ -1,9 +1,6 @@
 from kivy.core.audio import SoundLoader
 from kivy.clock import Clock
-from kivy.uix.image import Image
-from kivy.uix.label import Label
 
-from kivymd.uix.button import MDRectangleFlatIconButton
 from kivymd.uix.gridlayout import MDGridLayout
 
 from alarm_popup import AlarmDismissPopup
@@ -14,8 +11,8 @@ from config_handler import ConfigHandler
 import constants
 import datetime
 from helper import get_tomorrow_date
-from moon_widget import MoonWidget
-from weather_widget import WeatherWidget
+from time_pane import TimePane
+from wrapped_label import WrappedLabel
 
 audio_player = AudioPlayer()
 config_handler = ConfigHandler()
@@ -39,7 +36,7 @@ class MainScreen(MDGridLayout):
   Root widget for the main screen which shows the clock time, hijri and gregorian dates and prayer times.
   """
 
-  def __init__(self, **kwargs):
+  def __init__(self, audio_player, config_handler, **kwargs):
     """
     Create a MainScreen object
     :param kwargs: Kwargs for MDGridLayout
@@ -47,183 +44,11 @@ class MainScreen(MDGridLayout):
     super(MainScreen, self).__init__(**kwargs)
     self.cols = 2
 
-    self.add_widget(TimePane())
+    self.add_widget(TimePane(audio_player, config_handler))
 
     self.prayer_pane = PrayerPane(size_hint=(0.3, 1))
     self.add_widget(self.prayer_pane)
     self.prayer_pane.update()
-
-
-class TimePane(MDGridLayout):
-  """
-  Displays and updates the current clock time
-  """
-
-  def __init__(self, **kwargs):
-    """
-    Create a TimePane object
-    :param kwargs: Kwargs for MDGridLayout
-    """
-    super(TimePane, self).__init__(**kwargs)
-    self.cols = 1
-    self.rows = 3
-    self.time_widget = Label(text=datetime.datetime.now().strftime("%I:%M %p"), color=default_clock_color,
-                             font_name="RobotoMono-Regular",
-                             size_hint=(1, 0.5), font_size="50sp")
-
-    self.add_widget(CalendarBox(size_hint=(1, 0.5)))
-    self.add_widget(self.time_widget)
-
-    Clock.schedule_once(self.update, 60 - datetime.datetime.now().second % 60)
-
-    self.adhan_play_button = MDRectangleFlatIconButton(icon="play",
-                                                       text="Play adhan",
-                                                       text_color=default_clock_color)
-    self.adhan_play_button.bind(on_press=self.play_adhan)
-    self.add_widget(self.adhan_play_button)
-
-
-  def update(self, *args):
-    """
-    Schedules the clock time to update every minute
-    :param args: Args given by Kivy
-    :return: None
-    """
-    self.time_widget.text = datetime.datetime.now().strftime("%I:%M %p")
-    Clock.schedule_once(self.update, 60 - datetime.datetime.now().second % 60)
-
-  def play_adhan(self, *args):
-    """
-    Plays adhan sound
-    :param args: Args given by Kivy
-    :return: None
-    """
-    Clock.schedule_once(self.reset_adhan, 120)
-    adhan.play()
-
-  def reset_adhan(self, *args):
-    """
-    Resets adhan sound to the 0th time
-    :param args: Args given by Kivy
-    :return: None
-    """
-    adhan.seek(0)
-
-class CalendarBox(MDGridLayout):
-  """
-  Holds Labels for displaying hijri and gregorian date, and
-  holds logic for updating these dates, at their respective times of change.
-  """
-
-  def __init__(self, **kwargs):
-    """
-    Create a CalendarBox object
-    :param kwargs: Kwargs for MDGridLayout
-    """
-    super(CalendarBox, self).__init__(**kwargs)
-    self.cols = 3
-    self.rows = 1
-    gregorian_date = getter.get_gregorian_date()
-    self.gregorian_widget = WrappedLabel(text=gregorian_date["formatted_string"], color=default_text_color,
-                                         font_name="Roboto-Bold", font_size="16sp", size_hint=(0.5, 1),
-                                         padding=("10sp", "0sp"))
-
-    self.hijri_widget = WrappedLabel(text="14 Ramadan 1440 AH", color=default_text_color, font_name="Roboto-Bold",
-                                     font_size="16sp", size_hint=(0.5, 1), padding=("10sp", "0sp"))
-    self.update_hijri()
-    # Logo courtesy of flaticon
-    if config_handler.get_setting(constants.CONFIG_ENABLE_DARK_MODE_KEY):
-      self.add_widget(Image(source="res/mosque_white.png", keep_ratio=True, size_hint_x=0.1, pos=(0, 0)))
-    else:
-      self.add_widget(Image(source="res/mosque_dark.png", keep_ratio=True, size_hint_x=0.1, pos=(0, 0)))
-    self.add_widget(self.gregorian_widget)
-    self.add_widget(self.hijri_widget)
-
-    Clock.schedule_once(self.update_gregorian, (get_tomorrow_date() - datetime.datetime.now()).seconds)
-
-  def update_gregorian(self, *args):
-    """
-    Schedules a Clock schedule to update Gregorian date at midnight.
-    :param args: Args given by Kivy
-    :return: None
-    """
-    gregorian_date = getter.get_gregorian_date()
-    self.gregorian_widget.text = gregorian_date["formatted_string"]
-
-    Clock.schedule_once(self.update_gregorian, (get_tomorrow_date() - datetime.datetime.now()).seconds)
-
-  def update_hijri(self, *args):
-    """
-    Schedules a Clock schedule to update Hijri date at maghrib time.
-    :param args: Args given by Kivy
-    :return: None
-    """
-    is_after_maghrib = self.check_before_after_maghrib()
-    self.update_hijri_date(is_after_maghrib)
-    if is_after_maghrib:
-      Clock.schedule_once(self.update_hijri, (
-              self.get_time_of_prayer(self.get_prayer_times_tomorrow()["Maghrib"],
-                                      shift_tomorrow=True) - datetime.datetime.now()).seconds)
-    else:
-      Clock.schedule_once(self.update_hijri, (
-              self.get_time_of_prayer(self.get_prayer_times()["Maghrib"]) - datetime.datetime.now()).seconds)
-
-  def get_time_of_prayer(self, time_string, shift_tomorrow=False):
-    """
-    Takes a clock time string and returns a datetime object of today with that time string
-    :param time_string: A string of format "xx:xx pm/am" showing a certain clock time
-    :param shift_tomorrow: A boolean that states whether to shift to the next Islamic day, if it's after maghrib
-    :return: A datetime object with today's date, and the clock time corresponding to the time string
-    """
-
-    adhan_time = datetime.datetime.strptime(time_string, "%I:%M %p")
-    today = datetime.datetime.today()
-    today = today.replace(hour=adhan_time.hour, minute=adhan_time.minute, second=0, microsecond=0)
-    if shift_tomorrow:
-      today = today + datetime.timedelta(days=1)
-    return today
-
-  def update_hijri_date(self, is_tomorrow):
-    """
-    Updates the hijri date label
-    :param is_tomorrow: A boolean that states whether it's after maghrib, i.e. is it the next Islamic day
-    :return: None
-    """
-    future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_hijri_date, is_tomorrow)
-    hijri_date = future.result()
-    self.hijri_widget.text = str(hijri_date['day']) + " " + hijri_date['month'] + " " + str(hijri_date['year']) + " AH"
-
-  def check_before_after_maghrib(self):
-    """
-    Checks whether current time is before or after maghrib
-    :return: A boolean stating whether current time is before or after maghrib
-    """
-    current_time = datetime.datetime.now()
-    maghrib_today = self.get_time_of_prayer(self.get_prayer_times()["Maghrib"])
-    return current_time > maghrib_today
-
-  def get_prayer_times(self):
-    """
-    Obtains today's prayer times from API
-    :return: Returns today's prayer times in dict format
-    """
-    juristic_method = 0
-    if config_handler.get_setting(constants.CONFIG_USE_HANAFI_METHOD_KEY):
-      juristic_method = 1
-    todays_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_today, juristic_method)
-    return todays_times_future.result()
-
-  def get_prayer_times_tomorrow(self):
-    """
-    Obtains tomorrow's prayer times from API
-    :return: Returns tomorrow's prayer times in dict format
-    """
-    juristic_method = 0
-    if config_handler.get_setting(constants.CONFIG_USE_HANAFI_METHOD_KEY):
-      juristic_method = 1
-    tomorrow_times_future = concurrent.futures.ThreadPoolExecutor().submit(getter.get_prayer_times_tomorrow,
-                                                                           juristic_method)
-    return tomorrow_times_future.result()
 
 
 class PrayerPane(MDGridLayout):
@@ -453,21 +278,3 @@ class PrayerTimeLayout(MDGridLayout):
     self.todays_time_widget.text = self.prayer_time + ": " + todays_times[self.prayer_time]
     self.tomorrows_time_widget.text = "Tomorrow: " + tomorrow_times[self.prayer_time]
     self.schedule_adhan()
-
-
-class WrappedLabel(Label):
-  """
-  A subclass of Label which supports wrapping text automatically.
-  """
-
-  # Courtesy of https://stackoverflow.com/questions/43666381/wrapping-the-text-of-a-kivy-label
-  def __init__(self, **kwargs):
-    """
-    Creates a WrappedLabel object
-    :param kwargs: Arguments for Label
-    """
-    super().__init__(**kwargs)
-    self.bind(
-      width=lambda *x:
-      self.setter('text_size')(self, (self.width, None)),
-      texture_size=lambda *x: self.setter('height')(self, self.texture_size[1]))

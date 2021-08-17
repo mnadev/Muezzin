@@ -9,14 +9,14 @@ class MuezzinCarousel(Carousel):
     Defines a Carousel that swipes left/right and holds an InformationScreen, MainScreen and SettingsScreen.
     """
 
-    def __init__(self, config_handler, **kwargs):
+    def __init__(self, audio_player, config_handler, **kwargs):
         """
         Creates a MuezzinCarousel.
         :param kwargs: Kwargs for MDGridLayout
         """
         super(MuezzinCarousel, self).__init__(**kwargs)
         self.information_screen = InformationScreen(config_handler)
-        self.main_screen = MainScreen()
+        self.main_screen = MainScreen(audio_player, config_handler)
         self.settings_screen = SettingsScreen(config_handler)
 
         self.add_widget(self.information_screen)

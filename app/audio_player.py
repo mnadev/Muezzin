@@ -16,10 +16,10 @@ class AudioPlayer:
         self.reschedule_alarm_event = None
 
     def play_adhan(self):
+        Clock.schedule_once(self.reset_adhan, 120)
         self.adhan.play()
 
-    def stop_adhan(self):
-        self.adhan.stop()
+    def reset_adhan(self, *args):
         self.adhan.seek(0)
 
     def play_fajr_adhan(self):
