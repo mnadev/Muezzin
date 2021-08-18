@@ -3,6 +3,7 @@ import datetime
 from alarm_popup import AlarmDismissPopup
 from constants import (
     CONFIG_ENABLE_DARK_MODE_KEY,
+    CONFIG_FAJR_ALARM_KEY,
     DARK_THEME_TEXT_COLOR,
     LIGHT_THEME_TEXT_COLOR,
 )
@@ -87,7 +88,9 @@ class PrayerTimeLayout(MDGridLayout):
             self.play_adhan, (time_of_prayer - datetime.datetime.now()).total_seconds()
         )
 
-        if self.prayer_time == "Fajr":
+        if self.prayer_time == "Fajr" and self.config_handler.get_setting(
+            CONFIG_FAJR_ALARM_KEY
+        ):
             self.schedule_alarm_before_prayer()
 
     def schedule_alarm_before_prayer(self):
