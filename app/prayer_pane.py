@@ -61,7 +61,7 @@ class PrayerPane(MDGridLayout):
         self.alarm_schedule = None
 
         Clock.schedule_once(
-            self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds
+            self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60
         )
 
     def get_prayer_times(self):
@@ -93,7 +93,7 @@ class PrayerPane(MDGridLayout):
                 self.todays_times, self.tomorrow_times
             )
         Clock.schedule_once(
-            self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds
+            self.update, (get_tomorrow_date() - datetime.datetime.now()).seconds + 60
         )
         if self.config_handler.get_setting(constants.CONFIG_TAHAJJUD_ALARM_KEY):
             self.schedule_alarm_tahajjud()
