@@ -26,7 +26,7 @@ class AudioPlayer:
         Clock.schedule_once(self.reset_fajr_adhan, 220)
         self.fajr_adhan.play()
 
-    def reset_fajr_adhan(self):
+    def reset_fajr_adhan(self, *args):
         self.fajr_adhan.seek(0)
 
     def play_alarm(self):
