@@ -72,10 +72,12 @@ class PrayerPane(MDGridLayout):
         juristic_method = 0
         if self.config_handler.get_setting(constants.CONFIG_USE_HANAFI_METHOD_KEY):
             juristic_method = 1
+        print("Getting today's times through Futures")
         todays_times_future = concurrent.futures.ThreadPoolExecutor().submit(
             getter.get_prayer_times_today, juristic_method
         )
         self.todays_times = todays_times_future.result()
+        print("Getting tomorrow's times through Futures")
         tomorrow_times_future = concurrent.futures.ThreadPoolExecutor().submit(
             getter.get_prayer_times_tomorrow, juristic_method
         )
@@ -87,7 +89,18 @@ class PrayerPane(MDGridLayout):
         :param args: Args given by Kivy
         :return: None
         """
+        print("Old today's times: ") 
+        print(self.todays_times)
+        print("Old tomorrows's times: ")
+        print(self.tomorrow_times)
+        print("Getting prayer times first")
         self.get_prayer_times()
+        print("Obtained prayer times")
+        print("New today's times: ")
+        print(self.todays_times)
+        print("New tomorrows's times: ")
+        print(self.tomorrow_times)
+        print("Updating widgets")
         for prayer_time in ["Fajr", "Duha", "Dhuhr", "Asr", "Maghrib", "Isha"]:
             self.prayer_time_widgets[prayer_time].update(
                 self.todays_times, self.tomorrow_times

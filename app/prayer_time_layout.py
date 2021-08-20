@@ -152,6 +152,14 @@ class PrayerTimeLayout(MDGridLayout):
         :param tomorrow_times: Tomorrow's prayer times in dict format
         :return: None
         """
+        print("Current today times: ")
+        print(self.todays_times)
+        print("Current tomorrow times: ")
+        print(self.tomorrow_times)
+        print("New today times: ")
+        print(todays_times)
+        print("New tomorrow times: ")
+        print(tomorrow_times)
         self.todays_times = todays_times
         self.tomorrow_times = tomorrow_times
         self.todays_time_widget.text = (
