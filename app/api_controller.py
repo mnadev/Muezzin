@@ -74,7 +74,7 @@ def get_location():
 
 
 def _get_prayer_times(
-    juristic_method, country, zipcode, latitude, longitude, time_zone, time=arrow.now()
+    juristic_method, country, zipcode, latitude, longitude, time_zone, time
 ):
     """
     Gets prayer times for the defined parameters, including the defined time
@@ -149,6 +149,7 @@ def get_prayer_times_today(
         latitude=latitude,
         longitude=longitude,
         time_zone=time_zone,
+        time=arrow.now()
     )
 
 
