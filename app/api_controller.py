@@ -86,7 +86,6 @@ def _get_prayer_times(
     :param time_zone: The time zone where you want prayer times
     :return: Prayer times in dict format
     """
-    print(time)
     location = get_location()
 
     if latitude is None or longitude is None:
@@ -118,8 +117,6 @@ def _get_prayer_times(
     results = prayer_times_response.json()["results"]
     for prayer_time in results:
         results[prayer_time] = re.sub("%", "", results[prayer_time])
-    print("Results: ")
-    print(results)
     return results
 
 
@@ -141,7 +138,6 @@ def get_prayer_times_today(
     :param time_zone: The time zone where you want prayer times
     :return: Today's prayer times in dict format
     """
-    print("Getting today's times")
     return _get_prayer_times(
         juristic_method,
         country=country,
@@ -171,7 +167,6 @@ def get_prayer_times_tomorrow(
     :param time_zone: The time zone where you want prayer times
     :return: Tomorrow's prayer times in dict format
     """
-    print("Getting tomorrows's times")
     return _get_prayer_times(
         juristic_method,
         country=country,
